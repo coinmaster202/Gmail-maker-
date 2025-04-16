@@ -1,3 +1,5 @@
+// api/validate-access-code.js
+
 const ACCESS_CODES = {
   '2025': 'master',
   '1234': 'standard',
