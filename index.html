@@ -28,6 +28,18 @@
       --button-hover: #5b21b6;
       --input-border: #4b5563;
     }
+    body.rainbow {
+      --bg: linear-gradient(to right, #ff9a9e, #fad0c4);
+      --text: #111;
+      --card: #ffffffcc;
+      --tab-bg: #ff6ec4;
+      --tab-hover: #f093fb;
+      --tab-active: #f5576c;
+      --button-bg: #f5576c;
+      --button-hover: #f093fb;
+      --input-border: #f5576c;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--bg);
@@ -35,6 +47,7 @@
       margin: 0;
       padding: 0;
     }
+
     header {
       background: linear-gradient(to right, var(--tab-bg), var(--tab-active));
       color: white;
@@ -42,6 +55,7 @@
       text-align: center;
       position: relative;
     }
+
     #theme-toggle {
       position: absolute;
       top: 15px;
@@ -55,6 +69,7 @@
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
+
     main {
       max-width: 800px;
       margin: 30px auto;
@@ -62,6 +77,7 @@
       border-radius: 12px;
       padding: 20px;
     }
+
     .tabs {
       display: flex;
       justify-content: space-between;
@@ -69,6 +85,7 @@
       border-radius: 12px 12px 0 0;
       overflow: hidden;
     }
+
     .tab {
       flex: 1;
       padding: 15px;
@@ -77,20 +94,25 @@
       color: white;
       transition: background 0.3s;
     }
+
     .tab:hover {
       background: var(--tab-hover);
     }
+
     .tab.active {
       background: var(--tab-active);
       font-weight: bold;
     }
+
     .section {
       display: none;
       padding: 20px;
     }
+
     .section.active {
       display: block;
     }
+
     input, select, textarea, button {
       width: 100%;
       padding: 10px;
@@ -100,19 +122,23 @@
       box-sizing: border-box;
       border: 1px solid var(--input-border);
     }
+
     button {
       background: var(--button-bg);
       color: white;
       border: none;
       cursor: pointer;
     }
+
     button:hover {
       background: var(--button-hover);
     }
+
     ul {
       list-style: none;
       padding: 0;
     }
+
     footer {
       text-align: center;
       background: var(--tab-bg);
@@ -167,18 +193,18 @@
 
   <script>
     let master = false;
+    let rainbow = false;
     let latestVariations = [];
 
-    // Theme toggle
     document.getElementById("theme-toggle").onclick = () => {
       document.body.classList.toggle("dark");
+      document.body.classList.remove("rainbow");
       const icon = document.body.classList.contains("dark") ? "☀️" : "🌙";
       document.getElementById("theme-toggle").textContent = icon;
       localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
     };
     if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-    // Tab switcher
     document.querySelectorAll(".tab").forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -188,32 +214,53 @@
       };
     });
 
-    function submitAccessCode() {
+    async function submitAccessCode() {
       const code = document.getElementById("access-code").value.trim();
-      const select = document.getElementById("count-select");
-      if (code === "2025") {
-        master = true;
-        select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
-        select.disabled = true;
-      } else if (code === "1234") {
-        master = false;
-        select.disabled = false;
-        select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
-      } else {
+      const res = await fetch("/api/validate-access-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await res.json();
+      if (!data.valid) {
         alert("Invalid code");
         return;
       }
+
+      const select = document.getElementById("count-select");
+      if (data.mode === "master") {
+        master = true;
+        rainbow = false;
+        select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
+        select.disabled = true;
+      } else if (data.mode === "standard") {
+        master = false;
+        rainbow = false;
+        select.disabled = false;
+        select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
+      } else if (data.mode === "rainbow") {
+        master = false;
+        rainbow = true;
+        document.body.classList.add("rainbow");
+        document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
+        select.disabled = true;
+      }
+
       document.getElementById("generator-panel").style.display = "block";
     }
 
     function generateEmails() {
       const username = document.getElementById("gmail-user").value.trim();
-      const max = master ? Infinity : parseInt(document.getElementById("count-select").value);
       if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
+
       const positions = username.length - 1;
       const total = Math.pow(2, positions);
-      document.getElementById("dot-possibility").textContent = `Total possible: ${total - 1}`;
+      if (!rainbow) {
+        document.getElementById("dot-possibility").textContent = `Total possible: ${total - 1}`;
+      }
 
+      const max = master ? Infinity : (rainbow ? 200 : parseInt(document.getElementById("count-select").value));
       const emails = new Set();
       for (let i = 1; i < total && emails.size < max; i++) {
         let result = "";
