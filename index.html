@@ -229,6 +229,7 @@
       }
 
       const select = document.getElementById("count-select");
+
       if (data.mode === "master") {
         master = true;
         rainbow = false;
@@ -243,8 +244,8 @@
         master = false;
         rainbow = true;
         document.body.classList.add("rainbow");
-        document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
         select.disabled = true;
+        document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
       }
 
       document.getElementById("generator-panel").style.display = "block";
