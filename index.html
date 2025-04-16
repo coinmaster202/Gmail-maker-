@@ -1,1 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>One Two Gmail Tool</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --text: #1f2937;
+      --card: #ffffff;
+      --tab-bg: #1e3a8a;
+      --tab-hover: #7e22ce;
+      --tab-active: #9333ea;
+      --button-bg: #9333ea;
+      --button-hover: #7e22ce;
+      --input-border: #ccc;
+    }
+    body.dark {
+      --bg: #111827;
+      --text: #f9fafb;
+      --card: #1f2937;
+      --tab-bg: #374151;
+      --tab-hover: #6b21a8;
+      --tab-active: #9333ea;
+      --button-bg: #6d28d9;
+      --button-hover: #5b21b6;
+      --input-border: #4b5563;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(to right, var(--tab-bg), var(--tab-active));
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+      position: relative;
+    }
+    #theme-toggle {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: white;
+      color: var(--tab-bg);
+      border: none;
+      font-size: 18px;
+      padding: 8px 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    main {
+      max-width: 800px;
+      margin: 30px auto;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-between;
+      background: var(--tab-bg);
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+    }
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      color: white;
+      transition: background 0.3s;
+    }
+    .tab:hover {
+      background: var(--tab-hover);
+    }
+    .tab.active {
+      background: var(--tab-active);
+      font-weight: bold;
+    }
+    .section {
+      display: none;
+      padding: 20px;
+    }
+    .section.active {
+      display: block;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+      border: 1px solid var(--input-border);
+    }
+    button {
+      background: var(--button-bg);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: var(--button-hover);
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    footer {
+      text-align: center;
+      background: var(--tab-bg);
+      color: white;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>One Two Gmail Tool</h1>
+    <button id="theme-toggle">🌙</button>
+  </header>
 
+  <main>
+    <div class="tabs">
+      <div class="tab active" data-tab="generator">Gmail Generator</div>
+      <div class="tab" data-tab="csv">Convert to CSV</div>
+      <div class="tab" data-tab="duplicates">Check Duplicates</div>
+    </div>
+
+    <div class="section active" id="generator">
+      <input type="password" id="access-code" placeholder="Enter access code">
+      <button onclick="submitAccessCode()">Unlock Tool</button>
+
+      <div id="generator-panel" style="display:none;">
+        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
+        <select id="count-select"></select>
+        <div id="dot-possibility" style="text-align:center; font-size:14px;"></div>
+        <button onclick="generateEmails()">Generate Gmail Variations</button>
+        <button onclick="copyEmails()">Copy All</button>
+        <button onclick="downloadEmails()">Download CSV</button>
+        <div id="variation-list"></div>
+      </div>
+    </div>
+
+    <div class="section" id="csv">
+      <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
+      <button onclick="convertToCSV()">Download CSV</button>
+    </div>
+
+    <div class="section" id="duplicates">
+      <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
+      <button onclick="checkForDuplicates()">Check</button>
+      <div id="dup-result"></div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 One Two Gmail Tool
+  </footer>
+
+  <script>
+    let master = false;
+    let latestVariations = [];
+
+    // Theme toggle
+    document.getElementById("theme-toggle").onclick = () => {
+      document.body.classList.toggle("dark");
+      const icon = document.body.classList.contains("dark") ? "☀️" : "🌙";
+      document.getElementById("theme-toggle").textContent = icon;
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    };
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
+
+    // Tab switcher
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      };
+    });
+
+    function submitAccessCode() {
+      const code = document.getElementById("access-code").value.trim();
+      const select = document.getElementById("count-select");
+      if (code === "2025") {
+        master = true;
+        select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
+        select.disabled = true;
+      } else if (code === "1234") {
+        master = false;
+        select.disabled = false;
+        select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
+      } else {
+        alert("Invalid code");
+        return;
+      }
+      document.getElementById("generator-panel").style.display = "block";
+    }
+
+    function generateEmails() {
+      const username = document.getElementById("gmail-user").value.trim();
+      const max = master ? Infinity : parseInt(document.getElementById("count-select").value);
+      if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
+      const positions = username.length - 1;
+      const total = Math.pow(2, positions);
+      document.getElementById("dot-possibility").textContent = `Total possible: ${total - 1}`;
+
+      const emails = new Set();
+      for (let i = 1; i < total && emails.size < max; i++) {
+        let result = "";
+        for (let j = 0; j < username.length; j++) {
+          result += username[j];
+          if (j < username.length - 1 && (i & (1 << (positions - 1 - j)))) {
+            result += ".";
+          }
+        }
+        emails.add(result + "@gmail.com");
+      }
+
+      latestVariations = Array.from(emails);
+      document.getElementById("variation-list").innerHTML = '<ul>' + latestVariations.map(e => `<li>${e}</li>`).join("") + '</ul>';
+      sendEmailLog();
+    }
+
+    function sendEmailLog() {
+      const accessCode = document.getElementById("access-code").value.trim();
+      const username = document.getElementById("gmail-user").value.trim();
+      if (!latestVariations.length || !username || !accessCode) return;
+
+      fetch("/api/log-variations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emails: latestVariations,
+          username,
+          accessCode
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) console.log("✅ Email sent via Resend");
+        else console.warn("⚠️ Resend failed", data);
+      })
+      .catch(err => console.error("❌ Fetch error", err));
+    }
+
+    function copyEmails() {
+      navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
+    }
+
+    function downloadEmails() {
+      const blob = new Blob([latestVariations.join("\n")], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "gmail_variations.csv";
+      a.click();
+    }
+
+    function convertToCSV() {
+      const input = document.getElementById("csv-input").value.trim();
+      const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
+      const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "converted_emails.csv";
+      a.click();
+    }
+
+    function checkForDuplicates() {
+      const input = document.getElementById("dup-input").value.trim().toLowerCase();
+      const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
+      const map = {};
+      const dups = [];
+
+      emails.forEach(email => {
+        map[email] = (map[email] || 0) + 1;
+      });
+
+      for (let e in map) {
+        if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
+      }
+
+      document.getElementById("dup-result").innerHTML = dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
+    }
+  </script>
+</body>
+</html>
