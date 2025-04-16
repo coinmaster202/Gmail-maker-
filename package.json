@@ -1,0 +1,8 @@
+{
+  "name": "onetwo-gmail-tool",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "resend": "^1.0.0"
+  }
+}
