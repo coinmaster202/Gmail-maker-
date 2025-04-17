@@ -169,7 +169,7 @@
   <footer>
     &copy; 2025 One Two Gmail Tool
   </footer>
-  <script>
+<script>
     let codeUsed = false;
     let latestVariations = [];
     let accessMode = '';
@@ -199,19 +199,15 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code })
       });
-
       const data = await res.json();
-      if (!data.valid) {
-        alert("Invalid or already used code");
-        return;
-      }
+      if (!data.valid) return alert("Invalid or already used code");
 
       accessMode = data.mode;
       codeUsed = false;
 
       const select = document.getElementById("count-select");
-      if (accessMode === "master") {
-        select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
+      if (accessMode === "master" || accessMode === "unlimited") {
+        select.innerHTML = `<option disabled selected>Unlimited</option>`;
         select.disabled = true;
       } else if (accessMode === "rainbow") {
         document.body.classList.add("rainbow");
@@ -227,7 +223,8 @@
 
     function generateEmails() {
       if (codeUsed) {
-        alert("Code has already been used. Please refresh and use a new one.");
+        alert("This code has already been used.\nPlease refresh and enter a new access code.");
+        document.getElementById("generator-panel").style.display = "none";
         return;
       }
 
@@ -237,11 +234,12 @@
       const positions = username.length - 1;
       const total = Math.pow(2, positions);
 
-      const max = accessMode === "master" ? Infinity :
-                  accessMode === "v200" ? 200 :
-                  accessMode === "v500" ? 500 :
-                  accessMode === "v1000" ? 1000 :
-                  accessMode === "unlimited" ? Infinity : parseInt(document.getElementById("count-select").value);
+      const max =
+        accessMode === "master" || accessMode === "unlimited" ? Infinity :
+        accessMode === "v200" ? 200 :
+        accessMode === "v500" ? 500 :
+        accessMode === "v1000" ? 1000 :
+        parseInt(document.getElementById("count-select").value);
 
       const emails = new Set();
       for (let i = 1; i < total && emails.size < max; i++) {
@@ -275,13 +273,7 @@
           username,
           accessCode
         })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) console.log("✅ Email sent via Resend");
-        else console.warn("⚠️ Resend failed", data);
-      })
-      .catch(err => console.error("❌ Fetch error", err));
+      });
     }
 
     function copyEmails() {
