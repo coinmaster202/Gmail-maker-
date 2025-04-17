@@ -5,7 +5,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
 const permanentCodes = {
   '2025': 'master',
   '1234': 'standard',
-  'dickhead': 'rainbow'
+  'thebest': 'rainbow'
 };
 
 export default async function handler(req, res) {
