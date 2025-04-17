@@ -117,17 +117,21 @@
       padding: 20px;
     }
 
-    /* ✅ Floating theme toggle */
+    /* ✅ Elegant circular floating theme toggle */
     #theme-toggle {
       position: fixed;
       bottom: 20px;
       right: 20px;
+      width: 40px;
+      height: 40px;
       background: var(--tab-active);
       color: white;
       border: none;
-      font-size: 20px;
-      padding: 12px 14px;
       border-radius: 50%;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1000;
@@ -184,10 +188,10 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
-  <!-- ✅ Modern floating theme toggle -->
+  <!-- 🌙 Clean floating toggle button -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
 
-  <!-- External JS file -->
+  <!-- JavaScript logic -->
   <script src="script.js" defer></script>
 </body>
 </html>
