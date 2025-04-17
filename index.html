@@ -137,18 +137,23 @@
     <h1>One Two Gmail Tool</h1>
     <button id="theme-toggle">🌙</button>
   </header>
+
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
       <div class="tab" data-tab="csv">Convert to CSV</div>
       <div class="tab" data-tab="duplicates">Check Duplicates</div>
     </div>
+
     <div class="section active" id="generator">
       <input type="password" id="access-code" placeholder="Enter access code">
       <button onclick="submitAccessCode()">Unlock Tool</button>
+
       <div id="generator-panel" style="display:none;">
         <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
-        <select id="count-select"></select>
+        <select id="count-select" disabled>
+          <option disabled selected>Code-Based Limit</option>
+        </select>
         <div id="dot-possibility" style="text-align:center; font-size:14px;"></div>
         <button onclick="generateEmails()">Generate Gmail Variations</button>
         <button onclick="copyEmails()">Copy All</button>
@@ -156,19 +161,23 @@
         <div id="variation-list"></div>
       </div>
     </div>
+
     <div class="section" id="csv">
       <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
       <button onclick="convertToCSV()">Download CSV</button>
     </div>
+
     <div class="section" id="duplicates">
       <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
       <button onclick="checkForDuplicates()">Check</button>
       <div id="dup-result"></div>
     </div>
   </main>
+
   <footer>
     &copy; 2025 One Two Gmail Tool
   </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
