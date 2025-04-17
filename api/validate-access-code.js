@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 const permanentCodes = {
   '2025': 'master',
@@ -19,28 +22,24 @@ export default async function handler(req, res) {
   const { code } = req.body;
   if (!code) return res.status(400).json({ valid: false });
 
-  // ✅ Check permanent codes
+  // Permanent codes
   if (permanentCodes[code]) {
     return res.status(200).json({ valid: true, mode: permanentCodes[code] });
   }
 
-  // ✅ Check Supabase one-time codes
+  // One-time codes from Supabase
   const { data, error } = await supabase
     .from('one_time_codes')
     .select('mode')
     .eq('code', code)
     .single();
 
-  if (error || !data) {
+  if (!data || error) {
     return res.status(200).json({ valid: false });
   }
 
-  // ✅ Delete after first use
+  // Delete code after first successful use
   await supabase.from('one_time_codes').delete().eq('code', code);
 
-  // Return the one-time code's mode (v200, v500, v1000, unlimited)
-  return res.status(200).json({
-    valid: true,
-    mode: data.mode
-  });
+  return res.status(200).json({ valid: true, mode: data.mode });
 }
