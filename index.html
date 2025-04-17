@@ -137,18 +137,15 @@
     <h1>One Two Gmail Tool</h1>
     <button id="theme-toggle">🌙</button>
   </header>
-
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
       <div class="tab" data-tab="csv">Convert to CSV</div>
       <div class="tab" data-tab="duplicates">Check Duplicates</div>
     </div>
-
     <div class="section active" id="generator">
       <input type="password" id="access-code" placeholder="Enter access code">
       <button onclick="submitAccessCode()">Unlock Tool</button>
-
       <div id="generator-panel" style="display:none;">
         <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
         <select id="count-select"></select>
@@ -159,28 +156,23 @@
         <div id="variation-list"></div>
       </div>
     </div>
-
     <div class="section" id="csv">
       <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
       <button onclick="convertToCSV()">Download CSV</button>
     </div>
-
     <div class="section" id="duplicates">
       <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
       <button onclick="checkForDuplicates()">Check</button>
       <div id="dup-result"></div>
     </div>
   </main>
-
   <footer>
     &copy; 2025 One Two Gmail Tool
   </footer>
-
   <script>
-    let maxLimit = 0;
-    let master = false;
-    let rainbow = false;
+    let codeUsed = false;
     let latestVariations = [];
+    let accessMode = '';
 
     document.getElementById("theme-toggle").onclick = () => {
       document.body.classList.toggle("dark");
@@ -209,50 +201,47 @@
       });
 
       const data = await res.json();
+      if (!data.valid) {
+        alert("Invalid or already used code");
+        return;
+      }
+
+      accessMode = data.mode;
+      codeUsed = false;
+
       const select = document.getElementById("count-select");
-      if (!data.valid) return alert("Invalid code");
-
-      master = false;
-      rainbow = false;
-
-      if (data.mode === "master") {
-        master = true;
+      if (accessMode === "master") {
         select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
         select.disabled = true;
-      } else if (data.mode === "standard") {
+      } else if (accessMode === "rainbow") {
+        document.body.classList.add("rainbow");
+        select.disabled = true;
+        document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
+      } else {
         select.disabled = false;
         select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
-      } else if (data.mode === "rainbow") {
-        rainbow = true;
-        document.body.classList.add("rainbow");
-        maxLimit = 200;
-        select.disabled = true;
-        select.innerHTML = `<option disabled selected>200 variations</option>`;
-        document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
-      } else if (["v200", "v500", "v1000", "unlimited"].includes(data.mode)) {
-        const limits = { v200: 200, v500: 500, v1000: 1000 };
-        maxLimit = data.mode === "unlimited" ? Infinity : limits[data.mode];
-        select.disabled = true;
-        select.innerHTML = `<option disabled selected>${maxLimit === Infinity ? 'Unlimited' : maxLimit} variations</option>`;
-        document.getElementById("dot-possibility").textContent = `Total possible: ${maxLimit === Infinity ? 'Unlimited' : maxLimit}`;
       }
 
       document.getElementById("generator-panel").style.display = "block";
     }
 
     function generateEmails() {
-      const username = document.getElementById("gmail-user").value.trim();
-      const positions = username.length - 1;
-      const total = Math.pow(2, positions);
-      const select = document.getElementById("count-select");
+      if (codeUsed) {
+        alert("Code has already been used. Please refresh and use a new one.");
+        return;
+      }
 
+      const username = document.getElementById("gmail-user").value.trim();
       if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
 
-      let max = master ? Infinity : (rainbow ? 200 : (maxLimit || parseInt(select.value)));
+      const positions = username.length - 1;
+      const total = Math.pow(2, positions);
 
-      if (!rainbow) {
-        document.getElementById("dot-possibility").textContent = `Total possible: ${total - 1}`;
-      }
+      const max = accessMode === "master" ? Infinity :
+                  accessMode === "v200" ? 200 :
+                  accessMode === "v500" ? 500 :
+                  accessMode === "v1000" ? 1000 :
+                  accessMode === "unlimited" ? Infinity : parseInt(document.getElementById("count-select").value);
 
       const emails = new Set();
       for (let i = 1; i < total && emails.size < max; i++) {
@@ -269,6 +258,8 @@
       latestVariations = Array.from(emails);
       document.getElementById("variation-list").innerHTML = '<ul>' + latestVariations.map(e => `<li>${e}</li>`).join("") + '</ul>';
       sendEmailLog();
+      codeUsed = true;
+      document.querySelector('[onclick="generateEmails()"]').disabled = true;
     }
 
     function sendEmailLog() {
@@ -279,7 +270,11 @@
       fetch("/api/log-variations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emails: latestVariations, username, accessCode })
+        body: JSON.stringify({
+          emails: latestVariations,
+          username,
+          accessCode
+        })
       })
       .then(res => res.json())
       .then(data => {
@@ -316,8 +311,15 @@
       const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
       const map = {};
       const dups = [];
-      emails.forEach(email => { map[email] = (map[email] || 0) + 1; });
-      for (let e in map) if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
+
+      emails.forEach(email => {
+        map[email] = (map[email] || 0) + 1;
+      });
+
+      for (let e in map) {
+        if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
+      }
+
       document.getElementById("dup-result").innerHTML = dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
     }
   </script>
