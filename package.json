@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "resend": "^1.0.0"
+    "resend": "^1.0.0",
+    "@supabase/supabase-js": "^2.39.6"
   }
 }
