@@ -43,8 +43,8 @@ async function submitAccessCode() {
     select.disabled = true;
     document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
   } else {
-    select.disabled = false;
-    select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
+    select.disabled = true;
+    select.innerHTML = `<option disabled selected>Code-Based Limit</option>`;
   }
 
   document.getElementById("generator-panel").style.display = "block";
@@ -52,7 +52,7 @@ async function submitAccessCode() {
 
 function generateEmails() {
   if (codeUsed) {
-    alert("This code has already been used.\nPlease refresh and enter a new access code.");
+    alert("This code has already been used. Please refresh and enter a new access code.");
     document.getElementById("generator-panel").style.display = "none";
     return;
   }
@@ -68,7 +68,7 @@ function generateEmails() {
     accessMode === "v200" ? 200 :
     accessMode === "v500" ? 500 :
     accessMode === "v1000" ? 1000 :
-    parseInt(document.getElementById("count-select").value);
+    0;
 
   const emails = new Set();
   for (let i = 1; i < total && emails.size < max; i++) {
@@ -98,11 +98,7 @@ function sendEmailLog() {
   fetch("/api/log-variations", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      emails: latestVariations,
-      username,
-      accessCode
-    })
+    body: JSON.stringify({ emails: latestVariations, username, accessCode })
   });
 }
 
