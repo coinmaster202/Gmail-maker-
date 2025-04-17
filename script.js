@@ -54,7 +54,6 @@ async function submitAccessCode() {
     select.innerHTML = `<option disabled selected>Code-Based Limit</option>`;
   }
 
-  // ✅ Show the generator panel
   document.getElementById("generator-panel").style.display = "block";
 }
 
@@ -149,3 +148,6 @@ function checkForDuplicates() {
   document.getElementById("dup-result").innerHTML =
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
+
+// ✅ Make the unlock function global
+window.submitAccessCode = submitAccessCode;
