@@ -1,6 +1,7 @@
 let codeUsed = false;
 let latestVariations = [];
 let accessMode = '';
+let cooldown = false;
 
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
@@ -40,20 +41,28 @@ async function submitAccessCode() {
 
   accessMode = data.mode;
   codeUsed = false;
+  cooldown = false;
 
   const select = document.getElementById("count-select");
+  document.body.classList.remove("rainbow");
+
   if (accessMode === "master" || accessMode === "unlimited") {
-    select.innerHTML = `<option disabled selected>Unlimited</option>`;
-    select.disabled = true;
+    select.innerHTML = `<option disabled selected>Unlimited Variations</option>`;
   } else if (accessMode === "rainbow") {
     document.body.classList.add("rainbow");
-    select.disabled = true;
+    select.innerHTML = `<option disabled selected>Up to 200 (Rainbow)</option>`;
     document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
+  } else if (accessMode === "v200") {
+    select.innerHTML = `<option disabled selected>200 Variations Allowed</option>`;
+  } else if (accessMode === "v500") {
+    select.innerHTML = `<option disabled selected>500 Variations Allowed</option>`;
+  } else if (accessMode === "v1000") {
+    select.innerHTML = `<option disabled selected>1000 Variations Allowed</option>`;
   } else {
-    select.disabled = true;
-    select.innerHTML = `<option disabled selected>Code-Based Limit</option>`;
+    select.innerHTML = `<option disabled selected>Unknown Mode</option>`;
   }
 
+  select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
 }
 
@@ -61,6 +70,11 @@ function generateEmails() {
   if (codeUsed) {
     alert("This code has already been used. Please refresh and enter a new access code.");
     document.getElementById("generator-panel").style.display = "none";
+    return;
+  }
+
+  if (cooldown) {
+    alert("⏳ Please wait 5 seconds before generating again.");
     return;
   }
 
@@ -72,7 +86,7 @@ function generateEmails() {
 
   const max =
     accessMode === "master" || accessMode === "unlimited" ? Infinity :
-    accessMode === "v200" ? 200 :
+    accessMode === "rainbow" || accessMode === "v200" ? 200 :
     accessMode === "v500" ? 500 :
     accessMode === "v1000" ? 1000 :
     0;
@@ -90,11 +104,24 @@ function generateEmails() {
   }
 
   latestVariations = Array.from(emails);
+
+  // ✅ Live count display
+  document.getElementById("dot-possibility").innerHTML = 
+    `<p>✅ ${latestVariations.length} Gmail variations generated.</p>`;
+
   document.getElementById("variation-list").innerHTML =
     '<ul>' + latestVariations.map(e => `<li>${e}</li>`).join("") + '</ul>';
+
   sendEmailLog();
   codeUsed = true;
   document.querySelector('[onclick="generateEmails()"]').disabled = true;
+
+  // ✅ Cooldown block for 5 seconds
+  cooldown = true;
+  setTimeout(() => {
+    cooldown = false;
+    document.querySelector('[onclick="generateEmails()"]').disabled = false;
+  }, 5000);
 }
 
 function sendEmailLog() {
@@ -149,5 +176,5 @@ function checkForDuplicates() {
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
 
-// ✅ Make the unlock function global
+// ✅ Make submitAccessCode available globally for inline onclick
 window.submitAccessCode = submitAccessCode;
