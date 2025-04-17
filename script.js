@@ -22,16 +22,23 @@ document.querySelectorAll(".tab").forEach(btn => {
 
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
+  if (!code) return alert("Enter a code");
+
   const res = await fetch("/api/validate-access-code", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code })
   });
+
   const data = await res.json();
-  if (!data.valid) return alert("Invalid or already used code");
+  console.log("Validate result:", data);
+
+  if (!data.valid) {
+    alert("Invalid or already used code");
+    return;
+  }
 
   accessMode = data.mode;
-  console.log("Access mode:", accessMode);
   codeUsed = false;
 
   const select = document.getElementById("count-select");
