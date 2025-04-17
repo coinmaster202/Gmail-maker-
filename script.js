@@ -54,6 +54,7 @@ async function submitAccessCode() {
     select.innerHTML = `<option disabled selected>Code-Based Limit</option>`;
   }
 
+  // ✅ Show the generator panel
   document.getElementById("generator-panel").style.display = "block";
 }
 
