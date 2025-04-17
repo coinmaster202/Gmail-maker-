@@ -39,7 +39,6 @@
       --button-hover: #f093fb;
       --input-border: #f5576c;
     }
-
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--bg);
@@ -47,7 +46,6 @@
       margin: 0;
       padding: 0;
     }
-
     header {
       background: linear-gradient(to right, var(--tab-bg), var(--tab-active));
       color: white;
@@ -55,7 +53,6 @@
       text-align: center;
       position: relative;
     }
-
     #theme-toggle {
       position: absolute;
       top: 15px;
@@ -69,7 +66,6 @@
       cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-
     main {
       max-width: 800px;
       margin: 30px auto;
@@ -77,7 +73,6 @@
       border-radius: 12px;
       padding: 20px;
     }
-
     .tabs {
       display: flex;
       justify-content: space-between;
@@ -85,7 +80,6 @@
       border-radius: 12px 12px 0 0;
       overflow: hidden;
     }
-
     .tab {
       flex: 1;
       padding: 15px;
@@ -94,25 +88,20 @@
       color: white;
       transition: background 0.3s;
     }
-
     .tab:hover {
       background: var(--tab-hover);
     }
-
     .tab.active {
       background: var(--tab-active);
       font-weight: bold;
     }
-
     .section {
       display: none;
       padding: 20px;
     }
-
     .section.active {
       display: block;
     }
-
     input, select, textarea, button {
       width: 100%;
       padding: 10px;
@@ -122,23 +111,19 @@
       box-sizing: border-box;
       border: 1px solid var(--input-border);
     }
-
     button {
       background: var(--button-bg);
       color: white;
       border: none;
       cursor: pointer;
     }
-
     button:hover {
       background: var(--button-hover);
     }
-
     ul {
       list-style: none;
       padding: 0;
     }
-
     footer {
       text-align: center;
       background: var(--tab-bg);
@@ -192,6 +177,7 @@
   </footer>
 
   <script>
+    let maxLimit = 0;
     let master = false;
     let rainbow = false;
     let latestVariations = [];
@@ -223,29 +209,32 @@
       });
 
       const data = await res.json();
-      if (!data.valid) {
-        alert("Invalid code");
-        return;
-      }
-
       const select = document.getElementById("count-select");
+      if (!data.valid) return alert("Invalid code");
+
+      master = false;
+      rainbow = false;
 
       if (data.mode === "master") {
         master = true;
-        rainbow = false;
         select.innerHTML = `<option disabled selected>Unlimited (Master)</option>`;
         select.disabled = true;
       } else if (data.mode === "standard") {
-        master = false;
-        rainbow = false;
         select.disabled = false;
         select.innerHTML = [5, 10, 25, 50].map(n => `<option value="${n}">${n}</option>`).join("");
       } else if (data.mode === "rainbow") {
-        master = false;
         rainbow = true;
         document.body.classList.add("rainbow");
+        maxLimit = 200;
         select.disabled = true;
+        select.innerHTML = `<option disabled selected>200 variations</option>`;
         document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
+      } else if (["v200", "v500", "v1000", "unlimited"].includes(data.mode)) {
+        const limits = { v200: 200, v500: 500, v1000: 1000 };
+        maxLimit = data.mode === "unlimited" ? Infinity : limits[data.mode];
+        select.disabled = true;
+        select.innerHTML = `<option disabled selected>${maxLimit === Infinity ? 'Unlimited' : maxLimit} variations</option>`;
+        document.getElementById("dot-possibility").textContent = `Total possible: ${maxLimit === Infinity ? 'Unlimited' : maxLimit}`;
       }
 
       document.getElementById("generator-panel").style.display = "block";
@@ -253,15 +242,18 @@
 
     function generateEmails() {
       const username = document.getElementById("gmail-user").value.trim();
-      if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
-
       const positions = username.length - 1;
       const total = Math.pow(2, positions);
+      const select = document.getElementById("count-select");
+
+      if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
+
+      let max = master ? Infinity : (rainbow ? 200 : (maxLimit || parseInt(select.value)));
+
       if (!rainbow) {
         document.getElementById("dot-possibility").textContent = `Total possible: ${total - 1}`;
       }
 
-      const max = master ? Infinity : (rainbow ? 200 : parseInt(document.getElementById("count-select").value));
       const emails = new Set();
       for (let i = 1; i < total && emails.size < max; i++) {
         let result = "";
@@ -287,11 +279,7 @@
       fetch("/api/log-variations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          emails: latestVariations,
-          username,
-          accessCode
-        })
+        body: JSON.stringify({ emails: latestVariations, username, accessCode })
       })
       .then(res => res.json())
       .then(data => {
@@ -328,15 +316,8 @@
       const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
       const map = {};
       const dups = [];
-
-      emails.forEach(email => {
-        map[email] = (map[email] || 0) + 1;
-      });
-
-      for (let e in map) {
-        if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
-      }
-
+      emails.forEach(email => { map[email] = (map[email] || 0) + 1; });
+      for (let e in map) if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
       document.getElementById("dup-result").innerHTML = dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
     }
   </script>
