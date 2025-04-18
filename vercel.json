@@ -3,12 +3,11 @@
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
-    { "src": "api/ai-assistant.js", "use": "@vercel/node" }
+    { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/ai-assistant", "dest": "/api/ai-assistant.js" },
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "src": "/script.js", "dest": "/script.js" },
-    { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
-}
+}  
