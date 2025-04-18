@@ -94,31 +94,14 @@
       color: white;
       padding: 20px;
     }
-    #theme-toggle {
+
+    /* Theme + AI buttons */
+    #theme-toggle, #chat-button {
       position: fixed;
       bottom: 20px;
-      right: 70px;
-      width: 40px;
-      height: 40px;
-      background: var(--tab-active);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 1000;
-    }
-    #chat-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
       width: 50px;
       height: 50px;
-      font-size: 24px;
+      font-size: 22px;
       border-radius: 50%;
       background: var(--tab-active);
       color: white;
@@ -127,12 +110,16 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1001;
     }
+    #theme-toggle { right: 80px; }
+    #chat-button { right: 20px; }
+
+    /* Draggable AI Assistant */
     #chat-box {
       position: fixed;
       bottom: 80px;
       right: 20px;
-      width: 300px;
-      max-height: 400px;
+      width: 350px;
+      height: 500px;
       background: white;
       color: #111;
       border-radius: 12px;
@@ -140,7 +127,7 @@
       display: none;
       flex-direction: column;
       overflow: hidden;
-      z-index: 1001;
+      z-index: 1002;
     }
     #chat-box header {
       background: var(--tab-bg);
@@ -148,6 +135,17 @@
       padding: 10px;
       font-weight: bold;
       font-size: 16px;
+      cursor: move;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #chat-box header button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
     }
     #chat-messages {
       flex: 1;
@@ -162,14 +160,16 @@
     #chat-input input {
       flex: 1;
       border: none;
-      padding: 10px;
+      padding: 12px;
       font-size: 14px;
+      outline: none;
     }
     #chat-input button {
       background: var(--tab-active);
       border: none;
       color: white;
-      padding: 10px 15px;
+      padding: 0 15px;
+      font-size: 18px;
       cursor: pointer;
     }
     .msg.user { text-align: right; margin-bottom: 5px; }
@@ -228,34 +228,37 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
-  <!-- Theme toggle & AI assistant -->
+  <!-- Floating buttons -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
   <button id="chat-button">💬</button>
 
+  <!-- Chat box -->
   <div id="chat-box">
-    <header>AI Assistant</header>
+    <header>
+      AI Assistant
+      <button onclick="document.getElementById('chat-box').style.display='none'">➖</button>
+    </header>
     <div id="chat-messages"></div>
     <div id="chat-input">
-      <input type="text" id="chat-field" placeholder="Ask me anything about the tool...">
+      <input type="text" id="chat-field" placeholder="Ask about Gmail Tool...">
       <button onclick="sendChat()">➤</button>
     </div>
   </div>
 
   <script src="script.js" defer></script>
   <script>
-    const chatBtn = document.getElementById("chat-button");
-    const chatBox = document.getElementById("chat-box");
-    const chatMessages = document.getElementById("chat-messages");
-
-    chatBtn.onclick = () => {
-      chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+    // Chat toggle
+    document.getElementById("chat-button").onclick = () => {
+      document.getElementById("chat-box").style.display = "flex";
     };
 
+    // Send chat
     async function sendChat() {
       const input = document.getElementById("chat-field");
       const msg = input.value.trim();
       if (!msg) return;
 
+      const chatMessages = document.getElementById("chat-messages");
       chatMessages.innerHTML += `<div class="msg user">${msg}</div>`;
       input.value = "";
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -270,6 +273,32 @@
       chatMessages.innerHTML += `<div class="msg ai">${data.reply}</div>`;
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
+    // Make AI box draggable
+    (() => {
+      const box = document.getElementById("chat-box");
+      const header = box.querySelector("header");
+      let isDragging = false, offsetX = 0, offsetY = 0;
+
+      header.onmousedown = e => {
+        isDragging = true;
+        offsetX = e.clientX - box.offsetLeft;
+        offsetY = e.clientY - box.offsetTop;
+        document.onmousemove = e => {
+          if (isDragging) {
+            box.style.left = `${e.clientX - offsetX}px`;
+            box.style.top = `${e.clientY - offsetY}px`;
+            box.style.right = "auto";
+            box.style.bottom = "auto";
+            box.style.position = "fixed";
+          }
+        };
+        document.onmouseup = () => {
+          isDragging = false;
+          document.onmousemove = null;
+        };
+      };
+    })();
   </script>
 </body>
 </html>
