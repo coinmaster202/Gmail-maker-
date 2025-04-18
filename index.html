@@ -17,28 +17,6 @@
       --button-hover: #7e22ce;
       --input-border: #ccc;
     }
-    body.dark {
-      --bg: #111827;
-      --text: #f9fafb;
-      --card: #1f2937;
-      --tab-bg: #374151;
-      --tab-hover: #6b21a8;
-      --tab-active: #9333ea;
-      --button-bg: #6d28d9;
-      --button-hover: #5b21b6;
-      --input-border: #4b5563;
-    }
-    body.rainbow {
-      --bg: linear-gradient(to right, #ff9a9e, #fad0c4);
-      --text: #111;
-      --card: #ffffffcc;
-      --tab-bg: #ff6ec4;
-      --tab-hover: #f093fb;
-      --tab-active: #f5576c;
-      --button-bg: #f5576c;
-      --button-hover: #f093fb;
-      --input-border: #f5576c;
-    }
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--bg);
@@ -87,7 +65,6 @@
     }
     .section.active {
       display: block;
-      animation: fadeIn 0.4s ease-in-out;
     }
     input, select, textarea, button {
       width: 100%;
@@ -110,7 +87,6 @@
     ul {
       list-style: none;
       padding: 0;
-      animation: slideFadeIn 0.5s ease-out;
     }
     footer {
       text-align: center;
@@ -121,7 +97,7 @@
     #theme-toggle {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      right: 70px;
       width: 40px;
       height: 40px;
       background: var(--tab-active);
@@ -135,35 +111,76 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1000;
-      transition: background 0.3s, transform 0.2s;
     }
-    #theme-toggle:hover {
-      background: var(--tab-hover);
-      transform: scale(1.1);
+    #chat-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      border-radius: 50%;
+      background: var(--tab-active);
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 1001;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    #chat-box {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 300px;
+      max-height: 400px;
+      background: white;
+      color: #111;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 1001;
     }
-    @keyframes slideFadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    #dot-possibility p {
+    #chat-box header {
+      background: var(--tab-bg);
+      color: white;
+      padding: 10px;
       font-weight: bold;
-      font-size: 1rem;
-      animation: countUp 0.5s ease;
+      font-size: 16px;
     }
+    #chat-messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+    #chat-input {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    #chat-input input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+    }
+    #chat-input button {
+      background: var(--tab-active);
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+    .msg.user { text-align: right; margin-bottom: 5px; }
+    .msg.ai { text-align: left; margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <header>
     <h1>One Two Gmail Tool</h1>
   </header>
+
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -172,7 +189,6 @@
       <div class="tab" data-tab="formatter">Gmail Formatter</div>
       <div class="tab" data-tab="faker">Fake Generator</div>
     </div>
-
     <div class="section active" id="generator">
       <input type="password" id="access-code" placeholder="Enter access code">
       <button onclick="submitAccessCode()">Unlock Tool</button>
@@ -188,24 +204,20 @@
         <div id="variation-list"></div>
       </div>
     </div>
-
     <div class="section" id="csv">
       <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
       <button onclick="convertToCSV()">Download CSV</button>
     </div>
-
     <div class="section" id="duplicates">
       <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
       <button onclick="checkForDuplicates()">Check</button>
       <div id="dup-result"></div>
     </div>
-
     <div class="section" id="formatter">
       <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
       <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
       <div id="format-output"></div>
     </div>
-
     <div class="section" id="faker">
       <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
       <div id="fake-output"></div>
@@ -216,7 +228,48 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
+  <!-- Theme toggle & AI assistant -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
+  <button id="chat-button">💬</button>
+
+  <div id="chat-box">
+    <header>AI Assistant</header>
+    <div id="chat-messages"></div>
+    <div id="chat-input">
+      <input type="text" id="chat-field" placeholder="Ask me anything about the tool...">
+      <button onclick="sendChat()">➤</button>
+    </div>
+  </div>
+
   <script src="script.js" defer></script>
+  <script>
+    const chatBtn = document.getElementById("chat-button");
+    const chatBox = document.getElementById("chat-box");
+    const chatMessages = document.getElementById("chat-messages");
+
+    chatBtn.onclick = () => {
+      chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+    };
+
+    async function sendChat() {
+      const input = document.getElementById("chat-field");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      chatMessages.innerHTML += `<div class="msg user">${msg}</div>`;
+      input.value = "";
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      const res = await fetch("/api/ai-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await res.json();
+      chatMessages.innerHTML += `<div class="msg ai">${data.reply}</div>`;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  </script>
 </body>
 </html>
