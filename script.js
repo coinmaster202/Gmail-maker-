@@ -66,6 +66,19 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
+function animateCount(target, number) {
+  let current = 0;
+  const increment = Math.ceil(number / 30);
+  const interval = setInterval(() => {
+    current += increment;
+    if (current >= number) {
+      current = number;
+      clearInterval(interval);
+    }
+    target.innerHTML = `<p>✅ ${current.toLocaleString()} Gmail variations generated.</p>`;
+  }, 30);
+}
+
 function generateEmails() {
   if (codeUsed) {
     alert("This code has already been used. Please refresh and enter a new access code.");
@@ -105,9 +118,8 @@ function generateEmails() {
 
   latestVariations = Array.from(emails);
 
-  // ✅ Live count display
-  document.getElementById("dot-possibility").innerHTML = 
-    `<p>✅ ${latestVariations.length} Gmail variations generated.</p>`;
+  const counterEl = document.getElementById("dot-possibility");
+  animateCount(counterEl, latestVariations.length);
 
   document.getElementById("variation-list").innerHTML =
     '<ul>' + latestVariations.map(e => `<li>${e}</li>`).join("") + '</ul>';
@@ -116,7 +128,6 @@ function generateEmails() {
   codeUsed = true;
   document.querySelector('[onclick="generateEmails()"]').disabled = true;
 
-  // ✅ Cooldown block for 5 seconds
   cooldown = true;
   setTimeout(() => {
     cooldown = false;
@@ -176,5 +187,4 @@ function checkForDuplicates() {
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
 
-// ✅ Make submitAccessCode available globally for inline onclick
 window.submitAccessCode = submitAccessCode;
