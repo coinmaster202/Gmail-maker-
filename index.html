@@ -61,7 +61,7 @@
     }
     .tabs {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       background: var(--tab-bg);
       border-radius: 12px 12px 0 0;
       overflow: hidden;
@@ -118,7 +118,6 @@
       color: white;
       padding: 20px;
     }
-
     #theme-toggle {
       position: fixed;
       bottom: 20px;
@@ -142,23 +141,14 @@
       background: var(--tab-hover);
       transform: scale(1.1);
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
     @keyframes slideFadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes bounce {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
     @keyframes countUp {
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
@@ -174,18 +164,18 @@
   <header>
     <h1>One Two Gmail Tool</h1>
   </header>
-
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
       <div class="tab" data-tab="csv">Convert to CSV</div>
       <div class="tab" data-tab="duplicates">Check Duplicates</div>
+      <div class="tab" data-tab="formatter">Gmail Formatter</div>
+      <div class="tab" data-tab="faker">Fake Generator</div>
     </div>
 
     <div class="section active" id="generator">
       <input type="password" id="access-code" placeholder="Enter access code">
       <button onclick="submitAccessCode()">Unlock Tool</button>
-
       <div id="generator-panel" style="display:none;">
         <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
         <select id="count-select" disabled>
@@ -208,6 +198,17 @@
       <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
       <button onclick="checkForDuplicates()">Check</button>
       <div id="dup-result"></div>
+    </div>
+
+    <div class="section" id="formatter">
+      <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
+      <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
+      <div id="format-output"></div>
+    </div>
+
+    <div class="section" id="faker">
+      <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
+      <div id="fake-output"></div>
     </div>
   </main>
 
