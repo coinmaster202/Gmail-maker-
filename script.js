@@ -3,6 +3,7 @@ let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
 
+// Theme Toggle
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
   document.body.classList.remove("rainbow");
@@ -12,6 +13,7 @@ document.getElementById("theme-toggle").onclick = () => {
 };
 if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
+// Tab Switching
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -21,6 +23,7 @@ document.querySelectorAll(".tab").forEach(btn => {
   };
 });
 
+// Access Code Submission
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Enter a code");
@@ -32,8 +35,6 @@ async function submitAccessCode() {
   });
 
   const data = await res.json();
-  console.log("Validate result:", data);
-
   if (!data.valid) {
     alert("Invalid or already used code");
     return;
@@ -66,6 +67,7 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
+// Dot Counter Animation
 function animateCount(target, number) {
   let current = 0;
   const increment = Math.ceil(number / 30);
@@ -79,6 +81,7 @@ function animateCount(target, number) {
   }, 30);
 }
 
+// Gmail Generator
 function generateEmails() {
   if (codeUsed) {
     alert("This code has already been used. Please refresh and enter a new access code.");
@@ -135,6 +138,7 @@ function generateEmails() {
   }, 5000);
 }
 
+// Log via Resend
 function sendEmailLog() {
   const accessCode = document.getElementById("access-code").value.trim();
   const username = document.getElementById("gmail-user").value.trim();
@@ -147,10 +151,12 @@ function sendEmailLog() {
   });
 }
 
+// Copy to clipboard
 function copyEmails() {
   navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
+// Download as CSV
 function downloadEmails() {
   const blob = new Blob([latestVariations.join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
@@ -159,6 +165,7 @@ function downloadEmails() {
   a.click();
 }
 
+// Convert to CSV tool
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
@@ -169,6 +176,7 @@ function convertToCSV() {
   a.click();
 }
 
+// Duplicate Checker
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().toLowerCase();
   const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
@@ -187,4 +195,63 @@ function checkForDuplicates() {
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
 
+// Gmail Formatter
+function formatGmailVariations() {
+  const input = document.getElementById("format-input").value.trim();
+  const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
+  const map = {};
+
+  emails.forEach(email => {
+    const user = email.split("@")[0].replace(/\./g, "").toLowerCase();
+    if (!map[user]) map[user] = [];
+    map[user].push(email);
+  });
+
+  let output = "";
+  for (const user in map) {
+    output += `<h4>${user}@gmail.com</h4><ul><li>${map[user].join("</li><li>")}</li></ul>`;
+  }
+
+  document.getElementById("format-output").innerHTML = output || "No valid Gmail addresses found.";
+}
+
+// Fake Account Generator
+function generateFakeAccounts() {
+  const firstNames = ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fay", "Gabe", "Hana"];
+  const lastNames = ["Smith", "Johnson", "Lee", "Brown", "Taylor", "Martinez", "Clark", "Lewis"];
+  const countries = ["US", "UK", "Germany", "Canada", "Australia", "India"];
+  const fakeList = [];
+
+  for (let i = 0; i < 10; i++) {
+    const first = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const last = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const user = (first + last + Math.floor(Math.random() * 1000)).toLowerCase();
+    const email = user + "@gmail.com";
+    const password = Math.random().toString(36).slice(-10);
+    const dob = `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}/${Math.floor(Math.random() * 20) + 1985}`;
+    const country = countries[Math.floor(Math.random() * countries.length)];
+    const avatar = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user}`;
+
+    fakeList.push({ name: `${first} ${last}`, email, password, dob, country, avatar });
+  }
+
+  document.getElementById("fake-output").innerHTML = fakeList
+    .map(
+      acc => `<div style="margin-bottom:10px;">
+        <img src="${acc.avatar}" width="40" style="vertical-align:middle; border-radius:50%;"> 
+        <strong>${acc.name}</strong> - ${acc.email}<br>
+        <small>Pass: ${acc.password} | DOB: ${acc.dob} | ${acc.country}</small>
+      </div>`
+    )
+    .join("");
+}
+
+// Export all functions
 window.submitAccessCode = submitAccessCode;
+window.generateEmails = generateEmails;
+window.copyEmails = copyEmails;
+window.downloadEmails = downloadEmails;
+window.convertToCSV = convertToCSV;
+window.checkForDuplicates = checkForDuplicates;
+window.formatGmailVariations = formatGmailVariations;
+window.generateFakeAccounts = generateFakeAccounts;
