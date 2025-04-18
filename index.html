@@ -94,8 +94,6 @@
       color: white;
       padding: 20px;
     }
-
-    /* Theme + AI buttons */
     #theme-toggle, #chat-button {
       position: fixed;
       bottom: 20px;
@@ -112,8 +110,6 @@
     }
     #theme-toggle { right: 80px; }
     #chat-button { right: 20px; }
-
-    /* Draggable AI Assistant */
     #chat-box {
       position: fixed;
       bottom: 80px;
@@ -124,7 +120,7 @@
       color: #111;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      display: none;
+      display: flex;
       flex-direction: column;
       overflow: hidden;
       z-index: 1002;
@@ -173,94 +169,60 @@
       cursor: pointer;
     }
     .msg.user { text-align: right; margin-bottom: 5px; }
-    .msg.ai { text-align: left; margin-bottom: 10px; }
+    .msg.ai { text-align: left; margin-bottom: 10px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <header>
     <h1>One Two Gmail Tool</h1>
   </header>
-
   <main>
-    <div class="tabs">
-      <div class="tab active" data-tab="generator">Gmail Generator</div>
-      <div class="tab" data-tab="csv">Convert to CSV</div>
-      <div class="tab" data-tab="duplicates">Check Duplicates</div>
-      <div class="tab" data-tab="formatter">Gmail Formatter</div>
-      <div class="tab" data-tab="faker">Fake Generator</div>
-    </div>
-    <div class="section active" id="generator">
-      <input type="password" id="access-code" placeholder="Enter access code">
-      <button onclick="submitAccessCode()">Unlock Tool</button>
-      <div id="generator-panel" style="display:none;">
-        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
-        <select id="count-select" disabled>
-          <option disabled selected>Code-Based Limit</option>
-        </select>
-        <div id="dot-possibility" style="text-align:center; font-size:14px;"></div>
-        <button onclick="generateEmails()">Generate Gmail Variations</button>
-        <button onclick="copyEmails()">Copy All</button>
-        <button onclick="downloadEmails()">Download CSV</button>
-        <div id="variation-list"></div>
-      </div>
-    </div>
-    <div class="section" id="csv">
-      <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
-      <button onclick="convertToCSV()">Download CSV</button>
-    </div>
-    <div class="section" id="duplicates">
-      <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
-      <button onclick="checkForDuplicates()">Check</button>
-      <div id="dup-result"></div>
-    </div>
-    <div class="section" id="formatter">
-      <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
-      <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
-      <div id="format-output"></div>
-    </div>
-    <div class="section" id="faker">
-      <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
-      <div id="fake-output"></div>
-    </div>
+    <!-- your tabs/sections here -->
   </main>
-
   <footer>
     &copy; 2025 One Two Gmail Tool
   </footer>
-
-  <!-- Floating buttons -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
   <button id="chat-button">💬</button>
-
-  <!-- Chat box -->
-  <div id="chat-box">
+  <div id="chat-box" style="display:none">
     <header>
       AI Assistant
       <button onclick="document.getElementById('chat-box').style.display='none'">➖</button>
     </header>
     <div id="chat-messages"></div>
     <div id="chat-input">
-      <input type="text" id="chat-field" placeholder="Ask about Gmail Tool...">
+      <input type="text" id="chat-field" placeholder="Ask about Gmail Tool..." />
       <button onclick="sendChat()">➤</button>
     </div>
   </div>
-
-  <script src="script.js" defer></script>
   <script>
-    // Chat toggle
-    document.getElementById("chat-button").onclick = () => {
-      document.getElementById("chat-box").style.display = "flex";
+    const chatBtn = document.getElementById("chat-button");
+    const chatBox = document.getElementById("chat-box");
+    const chatField = document.getElementById("chat-field");
+    const chatMessages = document.getElementById("chat-messages");
+
+    chatBtn.onclick = () => {
+      chatBox.style.display = "flex";
     };
 
-    // Send chat
+    chatField.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendChat();
+      }
+    });
+
     async function sendChat() {
-      const input = document.getElementById("chat-field");
-      const msg = input.value.trim();
+      const msg = chatField.value.trim();
       if (!msg) return;
 
-      const chatMessages = document.getElementById("chat-messages");
-      chatMessages.innerHTML += `<div class="msg user">${msg}</div>`;
-      input.value = "";
+      chatMessages.innerHTML += `<div class='msg user'>${msg}</div>`;
+      chatField.value = "";
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      const loadingMsg = document.createElement("div");
+      loadingMsg.className = "msg ai";
+      loadingMsg.textContent = "Assistant is typing...";
+      chatMessages.appendChild(loadingMsg);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
       const res = await fetch("/api/ai-assistant", {
@@ -268,13 +230,12 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msg })
       });
-
       const data = await res.json();
-      chatMessages.innerHTML += `<div class="msg ai">${data.reply}</div>`;
+      loadingMsg.remove();
+      chatMessages.innerHTML += `<div class='msg ai'>${data.reply}</div>`;
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Make AI box draggable
     (() => {
       const box = document.getElementById("chat-box");
       const header = box.querySelector("header");
