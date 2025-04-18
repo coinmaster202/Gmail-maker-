@@ -3,7 +3,6 @@ let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
 
-// Theme Toggle
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
   document.body.classList.remove("rainbow");
@@ -13,7 +12,6 @@ document.getElementById("theme-toggle").onclick = () => {
 };
 if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-// Tab Switching
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -23,7 +21,6 @@ document.querySelectorAll(".tab").forEach(btn => {
   };
 });
 
-// Access Code Submission
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Enter a code");
@@ -67,7 +64,6 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
-// Dot Counter Animation
 function animateCount(target, number) {
   let current = 0;
   const increment = Math.ceil(number / 30);
@@ -81,7 +77,6 @@ function animateCount(target, number) {
   }, 30);
 }
 
-// Gmail Generator
 function generateEmails() {
   if (codeUsed) {
     alert("This code has already been used. Please refresh and enter a new access code.");
@@ -120,12 +115,23 @@ function generateEmails() {
   }
 
   latestVariations = Array.from(emails);
-
   const counterEl = document.getElementById("dot-possibility");
   animateCount(counterEl, latestVariations.length);
 
-  document.getElementById("variation-list").innerHTML =
-    '<ul>' + latestVariations.map(e => `<li>${e}</li>`).join("") + '</ul>';
+  const previewList =
+    username.length >= 12 ? latestVariations.slice(0, 500) : latestVariations;
+
+  let previewMessage =
+    username.length >= 12
+      ? `Showing first ${previewList.length} of ${latestVariations.length} emails (username is long).`
+      : `Total ${previewList.length} emails generated.`;
+
+  document.getElementById("variation-list").innerHTML = `
+    <p>${previewMessage}</p>
+    <ul>${previewList.map(e => `<li>${e}</li>`).join("")}</ul>
+    <button onclick="copyEmails()">Copy All</button>
+    <button onclick="downloadEmails()">Download All as CSV</button>
+  `;
 
   sendEmailLog();
   codeUsed = true;
@@ -138,7 +144,6 @@ function generateEmails() {
   }, 5000);
 }
 
-// Log via Resend
 function sendEmailLog() {
   const accessCode = document.getElementById("access-code").value.trim();
   const username = document.getElementById("gmail-user").value.trim();
@@ -151,12 +156,10 @@ function sendEmailLog() {
   });
 }
 
-// Copy to clipboard
 function copyEmails() {
   navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
-// Download as CSV
 function downloadEmails() {
   const blob = new Blob([latestVariations.join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
@@ -165,7 +168,6 @@ function downloadEmails() {
   a.click();
 }
 
-// Convert to CSV tool
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
@@ -176,7 +178,6 @@ function convertToCSV() {
   a.click();
 }
 
-// Duplicate Checker
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().toLowerCase();
   const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
@@ -195,7 +196,6 @@ function checkForDuplicates() {
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
 
-// Gmail Formatter
 function formatGmailVariations() {
   const input = document.getElementById("format-input").value.trim();
   const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
@@ -215,7 +215,6 @@ function formatGmailVariations() {
   document.getElementById("format-output").innerHTML = output || "No valid Gmail addresses found.";
 }
 
-// Fake Account Generator
 function generateFakeAccounts() {
   const firstNames = ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fay", "Gabe", "Hana"];
   const lastNames = ["Smith", "Johnson", "Lee", "Brown", "Taylor", "Martinez", "Clark", "Lewis"];
@@ -246,7 +245,6 @@ function generateFakeAccounts() {
     .join("");
 }
 
-// Export all functions
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
