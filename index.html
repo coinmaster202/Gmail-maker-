@@ -94,82 +94,6 @@
       color: white;
       padding: 20px;
     }
-    #theme-toggle, #chat-button {
-      position: fixed;
-      bottom: 20px;
-      width: 50px;
-      height: 50px;
-      font-size: 22px;
-      border-radius: 50%;
-      background: var(--tab-active);
-      color: white;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 1001;
-    }
-    #theme-toggle { right: 80px; }
-    #chat-button { right: 20px; }
-    #chat-box {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      width: 350px;
-      height: 500px;
-      background: white;
-      color: #111;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 1002;
-    }
-    #chat-box header {
-      background: var(--tab-bg);
-      color: white;
-      padding: 10px;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: move;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #chat-box header button {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    #chat-messages {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      font-size: 14px;
-    }
-    #chat-input {
-      display: flex;
-      border-top: 1px solid #ccc;
-    }
-    #chat-input input {
-      flex: 1;
-      border: none;
-      padding: 12px;
-      font-size: 14px;
-      outline: none;
-    }
-    #chat-input button {
-      background: var(--tab-active);
-      border: none;
-      color: white;
-      padding: 0 15px;
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .msg.user { text-align: right; margin-bottom: 5px; }
-    .msg.ai { text-align: left; margin-bottom: 10px; white-space: pre-wrap; }
   </style>
 </head>
 <body>
@@ -229,86 +153,34 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
-  <!-- Theme toggle & AI Assistant -->
-  <button id="theme-toggle" title="Toggle Theme">🌙</button>
-  <button id="chat-button">💬</button>
-  <div id="chat-box" style="display:none">
-    <header>
-      AI Assistant
-      <button onclick="document.getElementById('chat-box').style.display='none'">➖</button>
-    </header>
-    <div id="chat-messages"></div>
-    <div id="chat-input">
-      <input type="text" id="chat-field" placeholder="Ask about Gmail Tool..." />
-      <button onclick="sendChat()">➤</button>
-    </div>
-  </div>
-
   <script>
-    const chatBtn = document.getElementById("chat-button");
-    const chatBox = document.getElementById("chat-box");
-    const chatField = document.getElementById("chat-field");
-    const chatMessages = document.getElementById("chat-messages");
+    async function submitAccessCode() {
+      const code = document.getElementById("access-code").value.trim();
+      if (!code) return alert("Enter a code");
 
-    chatBtn.onclick = () => {
-      chatBox.style.display = "flex";
-    };
+      try {
+        const res = await fetch("/api/validate-access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
 
-    chatField.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        sendChat();
+        const data = await res.json();
+
+        if (!data.valid) {
+          alert("Invalid or already used access code");
+          return;
+        }
+
+        const select = document.getElementById("count-select");
+        select.innerHTML = `<option disabled selected>${data.mode === 'unlimited' || data.mode === 'master' ? 'Unlimited Variations' : data.mode.toUpperCase()} Access</option>`;
+        select.disabled = true;
+        document.getElementById("generator-panel").style.display = "block";
+      } catch (err) {
+        alert("Error validating code. Please try again later.");
+        console.error(err);
       }
-    });
-
-    async function sendChat() {
-      const msg = chatField.value.trim();
-      if (!msg) return;
-
-      chatMessages.innerHTML += `<div class='msg user'>${msg}</div>`;
-      chatField.value = "";
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      const loadingMsg = document.createElement("div");
-      loadingMsg.className = "msg ai";
-      loadingMsg.textContent = "Assistant is typing...";
-      chatMessages.appendChild(loadingMsg);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      const res = await fetch("/api/ai-assistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-      });
-      const data = await res.json();
-      loadingMsg.remove();
-      chatMessages.innerHTML += `<div class='msg ai'>${data.reply}</div>`;
-      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-
-    (() => {
-      const box = document.getElementById("chat-box");
-      const header = box.querySelector("header");
-      let isDragging = false, offsetX = 0, offsetY = 0;
-
-      header.onmousedown = e => {
-        isDragging = true;
-        offsetX = e.clientX - box.offsetLeft;
-        offsetY = e.clientY - box.offsetTop;
-        document.onmousemove = e => {
-          if (isDragging) {
-            box.style.left = `${e.clientX - offsetX}px`;
-            box.style.top = `${e.clientY - offsetY}px`;
-            box.style.right = "auto";
-            box.style.bottom = "auto";
-            box.style.position = "fixed";
-          }
-        };
-        document.onmouseup = () => {
-          isDragging = false;
-          document.onmousemove = null;
-        };
-      };
-    })();
   </script>
 </body>
 </html>
