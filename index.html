@@ -87,6 +87,7 @@
     }
     .section.active {
       display: block;
+      animation: fadeIn 0.4s ease-in-out;
     }
     input, select, textarea, button {
       width: 100%;
@@ -109,6 +110,7 @@
     ul {
       list-style: none;
       padding: 0;
+      animation: slideFadeIn 0.5s ease-out;
     }
     footer {
       text-align: center;
@@ -117,7 +119,6 @@
       padding: 20px;
     }
 
-    /* ✅ Elegant circular floating theme toggle */
     #theme-toggle {
       position: fixed;
       bottom: 20px;
@@ -140,6 +141,32 @@
     #theme-toggle:hover {
       background: var(--tab-hover);
       transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    #dot-possibility p {
+      font-weight: bold;
+      font-size: 1rem;
+      animation: countUp 0.5s ease;
     }
   </style>
 </head>
@@ -188,10 +215,7 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
-  <!-- 🌙 Clean floating toggle button -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
-
-  <!-- JavaScript logic -->
   <script src="script.js" defer></script>
 </body>
 </html>
