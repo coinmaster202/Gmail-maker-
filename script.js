@@ -134,10 +134,15 @@ function generateEmails() {
     emails.add(result + "@gmail.com");
     i++;
 
+    let interval = 10;
+    if (total >= 1000 && total < 10000) interval = 1000;
+    else if (total >= 10000 && total < 100000) interval = 10000;
+
+    if (emails.size % interval === 0) {
+      counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} generated...</p>`;
+    }
+
     if (emails.size <= max && i < total) {
-      if (emails.size % 10 === 0) {
-        counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} generated...</p>`;
-      }
       requestAnimationFrame(generateStep);
     } else {
       latestVariations = Array.from(emails);
@@ -269,7 +274,7 @@ function generateFakeAccounts() {
     .join("");
 }
 
-// Expose functions for HTML
+// Global access for HTML buttons
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
