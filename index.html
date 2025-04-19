@@ -178,7 +178,8 @@
       <small style="color:gray">One-time codes will expire after one use.</small>
       <button onclick="submitAccessCode()">Unlock Tool</button>
       <div id="generator-panel" style="display:none;">
-        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
+        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
+        <div id="live-possibility" style="font-size: 14px; text-align: center; margin-top: -5px;"></div>
         <select id="count-select" disabled>
           <option disabled selected>Code-Based Limit</option>
         </select>
@@ -216,6 +217,19 @@
   <footer>
     &copy; 2025 One Two Gmail Tool
   </footer>
+
+  <!-- Crash Warning Modal -->
+  <div id="crash-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; max-width:500px; width:90%; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; font-family:'Poppins',sans-serif;">
+      <h2 style="color:#b91c1c;">⚠️ Warning</h2>
+      <p style="font-size:16px; line-height:1.5;">
+        You’ve entered a Gmail name that can generate over <strong>50,000 variations</strong>.<br>
+        This may cause the site to freeze or crash, especially on phones.<br>
+        Large CSV files may also fail to open properly on mobile devices.
+      </p>
+      <button onclick="dismissCrashWarning()" style="margin-top:20px; padding:10px 20px; font-size:16px; background:#b91c1c; color:white; border:none; border-radius:6px; cursor:pointer;">I Understand</button>
+    </div>
+  </div>
 
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
   <script src="script.js" defer></script>
