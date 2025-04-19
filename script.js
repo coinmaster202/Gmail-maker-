@@ -2,6 +2,7 @@ let codeUsed = false;
 let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
+let hasShownCrashWarning = false;
 
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
@@ -63,6 +64,33 @@ async function submitAccessCode() {
 
   select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
+}
+
+function updatePossibilityCounter() {
+  const input = document.getElementById("gmail-user").value.trim();
+  const clean = input.replace(/[^a-zA-Z0-9]/g, "");
+  const display = document.getElementById("live-possibility");
+
+  if (clean.length < 2) {
+    display.innerHTML = "";
+    hasShownCrashWarning = false;
+    return;
+  }
+
+  const positions = clean.length - 1;
+  const total = Math.pow(2, positions);
+  const totalFormatted = total.toLocaleString();
+
+  display.innerHTML = `🧮 Possibilities: <strong>${totalFormatted}</strong> for "<code>${clean}</code>"`;
+
+  if (total >= 50000 && !hasShownCrashWarning) {
+    hasShownCrashWarning = true;
+    document.getElementById("crash-warning-modal").style.display = "flex";
+  }
+}
+
+function dismissCrashWarning() {
+  document.getElementById("crash-warning-modal").style.display = "none";
 }
 
 function generateEmails() {
@@ -130,7 +158,7 @@ function generateEmails() {
       sendEmailLog();
       codeUsed = true;
 
-      const genBtn = document.querySelector('[onclick="generateEmails()"]');
+      const genBtn = document.getElementById("generate-button");
       genBtn.disabled = true;
       genBtn.style.opacity = "0.5";
       genBtn.textContent = "Code Used";
@@ -241,7 +269,7 @@ function generateFakeAccounts() {
     .join("");
 }
 
-// Expose functions to global window for HTML onclick handlers
+// Expose functions for HTML
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
@@ -250,3 +278,5 @@ window.convertToCSV = convertToCSV;
 window.checkForDuplicates = checkForDuplicates;
 window.formatGmailVariations = formatGmailVariations;
 window.generateFakeAccounts = generateFakeAccounts;
+window.updatePossibilityCounter = updatePossibilityCounter;
+window.dismissCrashWarning = dismissCrashWarning;
