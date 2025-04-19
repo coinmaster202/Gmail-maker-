@@ -142,7 +142,7 @@ function generateEmails() {
       counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} generated...</p>`;
     }
 
-    if (emails.size <= max && i < total) {
+    if (emails.size < max && i < total) {
       requestAnimationFrame(generateStep);
     } else {
       latestVariations = Array.from(emails);
@@ -274,7 +274,7 @@ function generateFakeAccounts() {
     .join("");
 }
 
-// Global access for HTML buttons
+// Expose functions to global scope
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
