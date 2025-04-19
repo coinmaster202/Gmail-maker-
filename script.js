@@ -113,68 +113,63 @@ function generateEmails() {
     accessMode === "v500" ? 500 :
     accessMode === "v1000" ? 1000 : 0;
 
-  const emails = new Set();
-  let i = 1;
   const counterEl = document.getElementById("dot-possibility");
   counterEl.innerHTML = `<p>Generating variations...</p>`;
 
-  // Start spinner and progress bar
   const spinner = document.getElementById("spinner-overlay");
   const progress = document.getElementById("progress-bar");
   const progressWrap = document.getElementById("progress-container");
+
   spinner.style.display = "flex";
   progress.style.width = "0%";
   progressWrap.style.display = "block";
+
   let start = 0;
   const loadingInterval = setInterval(() => {
     start += 1;
     progress.style.width = `${start}%`;
     if (start >= 100) clearInterval(loadingInterval);
-  }, 30);
+  }, 30); // 3s
 
-  function generateStep() {
-    let result = "";
-    for (let j = 0; j < username.length; j++) {
-      result += username[j];
-      if (j < username.length - 1 && (i & (1 << (positions - 1 - j)))) {
-        result += ".";
+  setTimeout(() => {
+    const emails = new Set();
+    for (let i = 1; i < total && emails.size < max; i++) {
+      let result = "";
+      for (let j = 0; j < username.length; j++) {
+        result += username[j];
+        if (j < username.length - 1 && (i & (1 << (positions - 1 - j)))) {
+          result += ".";
+        }
       }
+      emails.add(result + "@gmail.com");
     }
-    emails.add(result + "@gmail.com");
-    i++;
 
-    if (emails.size < max && i < total) {
-      requestAnimationFrame(generateStep);
-    } else {
-      latestVariations = Array.from(emails);
-      spinner.style.display = "none";
-      progressWrap.style.display = "none";
-      counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
+    latestVariations = Array.from(emails);
+    spinner.style.display = "none";
+    progressWrap.style.display = "none";
+    counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
 
-      const listToShow = latestVariations.length > 2000 ? latestVariations.slice(0, 500) : latestVariations;
-      let previewMessage =
-        latestVariations.length > 2000
-          ? `Showing first 500 of ${latestVariations.length} emails (large result set).`
-          : `Total ${listToShow.length} emails generated.`;
+    const listToShow = latestVariations.length > 2000 ? latestVariations.slice(0, 500) : latestVariations;
+    let previewMessage =
+      latestVariations.length > 2000
+        ? `Showing first 500 of ${latestVariations.length} emails (large result set).`
+        : `Total ${listToShow.length} emails generated.`;
 
-      document.getElementById("variation-list").innerHTML = `
-        <p>${previewMessage}</p>
-        <ul>${listToShow.map(e => `<li>${e}</li>`).join("")}</ul>
-        <button onclick="copyEmails()">Copy All</button>
-        <button onclick="downloadEmails()">Download All as CSV</button>
-      `;
+    document.getElementById("variation-list").innerHTML = `
+      <p>${previewMessage}</p>
+      <ul>${listToShow.map(e => `<li>${e}</li>`).join("")}</ul>
+      <button onclick="copyEmails()">Copy All</button>
+      <button onclick="downloadEmails()">Download All as CSV</button>
+    `;
 
-      sendEmailLog();
-      codeUsed = true;
+    sendEmailLog();
+    codeUsed = true;
 
-      const genBtn = document.getElementById("generate-button");
-      genBtn.disabled = true;
-      genBtn.style.opacity = "0.5";
-      genBtn.textContent = "Code Used";
-    }
-  }
-
-  generateStep();
+    const genBtn = document.getElementById("generate-button");
+    genBtn.disabled = true;
+    genBtn.style.opacity = "0.5";
+    genBtn.textContent = "Code Used";
+  }, 3000); // Show results after 3 seconds
 }
 
 function sendEmailLog() {
