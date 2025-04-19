@@ -97,6 +97,7 @@ function generateEmails() {
     document.getElementById("generator-panel").style.display = "none";
     return;
   }
+
   if (cooldown) {
     alert("⏳ Please wait 5 seconds before generating again.");
     return;
@@ -114,8 +115,6 @@ function generateEmails() {
     accessMode === "v1000" ? 1000 : 0;
 
   const counterEl = document.getElementById("dot-possibility");
-  counterEl.innerHTML = `<p>Generating variations...</p>`;
-
   const spinner = document.getElementById("spinner-overlay");
   const progress = document.getElementById("progress-bar");
   const progressWrap = document.getElementById("progress-container");
@@ -123,6 +122,7 @@ function generateEmails() {
   spinner.style.display = "flex";
   progress.style.width = "0%";
   progressWrap.style.display = "block";
+  counterEl.innerHTML = `<p>Generating variations...</p>`;
 
   let start = 0;
   const loadingInterval = setInterval(() => {
@@ -147,10 +147,11 @@ function generateEmails() {
     latestVariations = Array.from(emails);
     spinner.style.display = "none";
     progressWrap.style.display = "none";
+
     counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
 
     const listToShow = latestVariations.length > 2000 ? latestVariations.slice(0, 500) : latestVariations;
-    let previewMessage =
+    const previewMessage =
       latestVariations.length > 2000
         ? `Showing first 500 of ${latestVariations.length} emails (large result set).`
         : `Total ${listToShow.length} emails generated.`;
@@ -169,7 +170,7 @@ function generateEmails() {
     genBtn.disabled = true;
     genBtn.style.opacity = "0.5";
     genBtn.textContent = "Code Used";
-  }, 3000); // Show results after 3 seconds
+  }, 500); // trigger result after slight delay
 }
 
 function sendEmailLog() {
