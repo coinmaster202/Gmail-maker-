@@ -34,7 +34,7 @@ async function submitAccessCode() {
 
   const data = await res.json();
   if (!data.valid) {
-    alert(data.reason || "❌ That code is invalid, expired, or already used. Please try another.");
+    alert(data.reason || "❌ That code is invalid, expired, or already used.");
     return;
   }
 
@@ -79,9 +79,7 @@ function updatePossibilityCounter() {
 
   const positions = clean.length - 1;
   const total = Math.pow(2, positions);
-  const totalFormatted = total.toLocaleString();
-
-  display.innerHTML = `🧮 Possibilities: <strong>${totalFormatted}</strong> for "<code>${clean}</code>"`;
+  display.innerHTML = `🧮 Possibilities: <strong>${total.toLocaleString()}</strong>`;
 
   if (total >= 50000 && !hasShownCrashWarning) {
     hasShownCrashWarning = true;
@@ -95,11 +93,10 @@ function dismissCrashWarning() {
 
 function generateEmails() {
   if (codeUsed) {
-    alert("This code has already been used. Please refresh and enter a new access code.");
+    alert("This code has already been used. Please refresh and enter a new one.");
     document.getElementById("generator-panel").style.display = "none";
     return;
   }
-
   if (cooldown) {
     alert("⏳ Please wait 5 seconds before generating again.");
     return;
@@ -110,18 +107,30 @@ function generateEmails() {
 
   const positions = username.length - 1;
   const total = Math.pow(2, positions);
-
   const max =
     accessMode === "master" || accessMode === "unlimited" ? Infinity :
     accessMode === "rainbow" || accessMode === "v200" ? 200 :
     accessMode === "v500" ? 500 :
-    accessMode === "v1000" ? 1000 :
-    0;
+    accessMode === "v1000" ? 1000 : 0;
 
   const emails = new Set();
   let i = 1;
   const counterEl = document.getElementById("dot-possibility");
   counterEl.innerHTML = `<p>Generating variations...</p>`;
+
+  // Start spinner and progress bar
+  const spinner = document.getElementById("spinner-overlay");
+  const progress = document.getElementById("progress-bar");
+  const progressWrap = document.getElementById("progress-container");
+  spinner.style.display = "flex";
+  progress.style.width = "0%";
+  progressWrap.style.display = "block";
+  let start = 0;
+  const loadingInterval = setInterval(() => {
+    start += 1;
+    progress.style.width = `${start}%`;
+    if (start >= 100) clearInterval(loadingInterval);
+  }, 30);
 
   function generateStep() {
     let result = "";
@@ -134,24 +143,19 @@ function generateEmails() {
     emails.add(result + "@gmail.com");
     i++;
 
-    let interval = 10;
-    if (total >= 1000 && total < 10000) interval = 1000;
-    else if (total >= 10000 && total < 100000) interval = 10000;
-
-    if (emails.size % interval === 0) {
-      counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} generated...</p>`;
-    }
-
     if (emails.size < max && i < total) {
       requestAnimationFrame(generateStep);
     } else {
       latestVariations = Array.from(emails);
+      spinner.style.display = "none";
+      progressWrap.style.display = "none";
       counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
 
-      const listToShow = username.length >= 12 ? latestVariations.slice(0, 500) : latestVariations;
-      let previewMessage = username.length >= 12
-        ? `Showing first ${listToShow.length} of ${latestVariations.length} emails (username is long).`
-        : `Total ${listToShow.length} emails generated.`;
+      const listToShow = latestVariations.length > 2000 ? latestVariations.slice(0, 500) : latestVariations;
+      let previewMessage =
+        latestVariations.length > 2000
+          ? `Showing first 500 of ${latestVariations.length} emails (large result set).`
+          : `Total ${listToShow.length} emails generated.`;
 
       document.getElementById("variation-list").innerHTML = `
         <p>${previewMessage}</p>
@@ -264,17 +268,15 @@ function generateFakeAccounts() {
   }
 
   document.getElementById("fake-output").innerHTML = fakeList
-    .map(
-      acc => `<div style="margin-bottom:10px;">
+    .map(acc => `
+      <div style="margin-bottom:10px;">
         <img src="${acc.avatar}" width="40" style="vertical-align:middle; border-radius:50%;"> 
         <strong>${acc.name}</strong> - ${acc.email}<br>
         <small>Pass: ${acc.password} | DOB: ${acc.dob} | ${acc.country}</small>
-      </div>`
-    )
-    .join("");
+      </div>
+    `).join("");
 }
 
-// Expose functions to global scope
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
