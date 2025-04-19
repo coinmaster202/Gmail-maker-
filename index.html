@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -16,28 +15,6 @@
       --button-bg: #9333ea;
       --button-hover: #7e22ce;
       --input-border: #ccc;
-    }
-    body.dark {
-      --bg: #111827;
-      --text: #f9fafb;
-      --card: #1f2937;
-      --tab-bg: #374151;
-      --tab-hover: #6b21a8;
-      --tab-active: #9333ea;
-      --button-bg: #6d28d9;
-      --button-hover: #5b21b6;
-      --input-border: #4b5563;
-    }
-    body.rainbow {
-      --bg: linear-gradient(to right, #ff9a9e, #fad0c4);
-      --text: #111;
-      --card: #ffffffcc;
-      --tab-bg: #ff6ec4;
-      --tab-hover: #f093fb;
-      --tab-active: #f5576c;
-      --button-bg: #f5576c;
-      --button-hover: #f093fb;
-      --input-border: #f5576c;
     }
     body {
       font-family: 'Poppins', sans-serif;
@@ -87,7 +64,6 @@
     }
     .section.active {
       display: block;
-      animation: fadeIn 0.4s ease-in-out;
     }
     input, select, textarea, button {
       width: 100%;
@@ -110,7 +86,6 @@
     ul {
       list-style: none;
       padding: 0;
-      animation: slideFadeIn 0.5s ease-out;
     }
     footer {
       text-align: center;
@@ -118,105 +93,106 @@
       color: white;
       padding: 20px;
     }
-    #theme-toggle {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      background: var(--tab-active);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      z-index: 1000;
-      transition: background 0.3s, transform 0.2s;
-    }
-    #theme-toggle:hover {
-      background: var(--tab-hover);
-      transform: scale(1.1);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideFadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    #dot-possibility p {
-      font-weight: bold;
-      font-size: 1rem;
-      animation: countUp 0.5s ease;
-    }
   </style>
 </head>
 <body>
   <header>
     <h1>One Two Gmail Tool</h1>
-  </header>
-  <main>
+  </header>  <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
       <div class="tab" data-tab="csv">Convert to CSV</div>
       <div class="tab" data-tab="duplicates">Check Duplicates</div>
       <div class="tab" data-tab="formatter">Gmail Formatter</div>
       <div class="tab" data-tab="faker">Fake Generator</div>
-    </div>
+    </div><div class="section active" id="generator">
+  <input type="password" id="access-code" placeholder="Enter access code">
+  <button onclick="submitAccessCode()">Unlock Tool</button>
+  <div id="generator-panel" style="display:none;">
+    <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
+    <select id="count-select" disabled>
+      <option disabled selected>Code-Based Limit</option>
+    </select>
+    <div id="dot-possibility" style="text-align:center; font-size:14px;"></div>
+    <button onclick="generateEmails()">Generate Gmail Variations</button>
+    <button onclick="copyEmails()">Copy All</button>
+    <button onclick="downloadEmails()">Download CSV</button>
+    <div id="variation-list"></div>
+  </div>
+</div>
 
-    <div class="section active" id="generator">
-      <input type="password" id="access-code" placeholder="Enter access code">
-      <button onclick="submitAccessCode()">Unlock Tool</button>
-      <div id="generator-panel" style="display:none;">
-        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
-        <select id="count-select" disabled>
-          <option disabled selected>Code-Based Limit</option>
-        </select>
-        <div id="dot-possibility" style="text-align:center; font-size:14px;"></div>
-        <button onclick="generateEmails()">Generate Gmail Variations</button>
-        <button onclick="copyEmails()">Copy All</button>
-        <button onclick="downloadEmails()">Download CSV</button>
-        <div id="variation-list"></div>
-      </div>
-    </div>
+<div class="section" id="csv">
+  <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
+  <button onclick="convertToCSV()">Download CSV</button>
+</div>
 
-    <div class="section" id="csv">
-      <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
-      <button onclick="convertToCSV()">Download CSV</button>
-    </div>
+<div class="section" id="duplicates">
+  <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
+  <button onclick="checkForDuplicates()">Check</button>
+  <div id="dup-result"></div>
+</div>
 
-    <div class="section" id="duplicates">
-      <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
-      <button onclick="checkForDuplicates()">Check</button>
-      <div id="dup-result"></div>
-    </div>
+<div class="section" id="formatter">
+  <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
+  <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
+  <div id="format-output"></div>
+</div>
 
-    <div class="section" id="formatter">
-      <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
-      <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
-      <div id="format-output"></div>
-    </div>
+<div class="section" id="faker">
+  <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
+  <div id="fake-output"></div>
+</div>
 
-    <div class="section" id="faker">
-      <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
-      <div id="fake-output"></div>
-    </div>
-  </main>
-
-  <footer>
+  </main>  <footer>
     &copy; 2025 One Two Gmail Tool
-  </footer>
+  </footer>  <script>
+    async function submitAccessCode() {
+      const code = document.getElementById("access-code").value.trim();
+      if (!code) return alert("Enter a code");
 
-  <button id="theme-toggle" title="Toggle Theme">🌙</button>
-  <script src="script.js" defer></script>
-</body>
+      try {
+        const res = await fetch("/api/validate-access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json();
+
+        if (!data.valid) {
+          alert("Invalid or already used access code");
+          return;
+        }
+
+        const select = document.getElementById("count-select");
+        select.innerHTML = `<option disabled selected>${data.mode === 'unlimited' || data.mode === 'master' ? 'Unlimited Variations' : data.mode.toUpperCase()} Access</option>`;
+        select.disabled = true;
+        document.getElementById("generator-panel").style.display = "block";
+      } catch (err) {
+        alert("Error validating code. Please try again later.");
+        console.error(err);
+      }
+    }
+  document.getElementById("gmail-user").addEventListener("input", function () {
+  const val = this.value.trim();
+  const output = document.getElementById("dot-possibility");
+
+  if (!/^[a-zA-Z0-9]*$/.test(val)) {
+    output.innerHTML = "<span style='color:red'>Only letters and numbers allowed</span>";
+    return;
+  }
+
+  if (val.length < 2) {
+    output.textContent = "Enter at least 2 characters to see variations.";
+    return;
+  }
+
+  const possible = Math.pow(2, val.length - 1);
+  output.innerHTML = `Total possible Gmail dot variations: <strong>${possible.toLocaleString()}</strong>`;
+
+  if (possible > 1000000) {
+    output.innerHTML += "<br><span style='color:orange'>Warning: Not all can be generated at once</span>";
+  }
+});
+</script></body>
 </html>
