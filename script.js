@@ -33,7 +33,7 @@ async function submitAccessCode() {
 
   const data = await res.json();
   if (!data.valid) {
-    alert("Invalid or already used code");
+    alert(data.reason || "❌ That code is invalid, expired, or already used. Please try another.");
     return;
   }
 
@@ -50,6 +50,7 @@ async function submitAccessCode() {
     document.body.classList.add("rainbow");
     select.innerHTML = `<option disabled selected>Up to 200 (Rainbow)</option>`;
     document.getElementById("dot-possibility").textContent = `Total possible: 1,000,000`;
+    document.getElementById("theme-toggle").textContent = "🌈";
   } else if (accessMode === "v200") {
     select.innerHTML = `<option disabled selected>200 Variations Allowed</option>`;
   } else if (accessMode === "v500") {
@@ -62,19 +63,6 @@ async function submitAccessCode() {
 
   select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
-}
-
-function animateCount(target, number) {
-  let current = 0;
-  const increment = Math.ceil(number / 30);
-  const interval = setInterval(() => {
-    current += increment;
-    if (current >= number) {
-      current = number;
-      clearInterval(interval);
-    }
-    target.innerHTML = `<p>✅ ${current.toLocaleString()} Gmail variations generated.</p>`;
-  }, 30);
 }
 
 function generateEmails() {
@@ -103,7 +91,11 @@ function generateEmails() {
     0;
 
   const emails = new Set();
-  for (let i = 1; i < total && emails.size < max; i++) {
+  let i = 1;
+  const counterEl = document.getElementById("dot-possibility");
+  counterEl.innerHTML = `<p>Generating variations...</p>`;
+
+  function generateStep() {
     let result = "";
     for (let j = 0; j < username.length; j++) {
       result += username[j];
@@ -112,36 +104,40 @@ function generateEmails() {
       }
     }
     emails.add(result + "@gmail.com");
+    i++;
+
+    if (emails.size <= max && i < total) {
+      if (emails.size % 10 === 0) {
+        counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} generated...</p>`;
+      }
+      requestAnimationFrame(generateStep);
+    } else {
+      latestVariations = Array.from(emails);
+      counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
+
+      const listToShow = username.length >= 12 ? latestVariations.slice(0, 500) : latestVariations;
+      let previewMessage = username.length >= 12
+        ? `Showing first ${listToShow.length} of ${latestVariations.length} emails (username is long).`
+        : `Total ${listToShow.length} emails generated.`;
+
+      document.getElementById("variation-list").innerHTML = `
+        <p>${previewMessage}</p>
+        <ul>${listToShow.map(e => `<li>${e}</li>`).join("")}</ul>
+        <button onclick="copyEmails()">Copy All</button>
+        <button onclick="downloadEmails()">Download All as CSV</button>
+      `;
+
+      sendEmailLog();
+      codeUsed = true;
+
+      const genBtn = document.querySelector('[onclick="generateEmails()"]');
+      genBtn.disabled = true;
+      genBtn.style.opacity = "0.5";
+      genBtn.textContent = "Code Used";
+    }
   }
 
-  latestVariations = Array.from(emails);
-  const counterEl = document.getElementById("dot-possibility");
-  animateCount(counterEl, latestVariations.length);
-
-  const previewList =
-    username.length >= 12 ? latestVariations.slice(0, 500) : latestVariations;
-
-  let previewMessage =
-    username.length >= 12
-      ? `Showing first ${previewList.length} of ${latestVariations.length} emails (username is long).`
-      : `Total ${previewList.length} emails generated.`;
-
-  document.getElementById("variation-list").innerHTML = `
-    <p>${previewMessage}</p>
-    <ul>${previewList.map(e => `<li>${e}</li>`).join("")}</ul>
-    <button onclick="copyEmails()">Copy All</button>
-    <button onclick="downloadEmails()">Download All as CSV</button>
-  `;
-
-  sendEmailLog();
-  codeUsed = true;
-  document.querySelector('[onclick="generateEmails()"]').disabled = true;
-
-  cooldown = true;
-  setTimeout(() => {
-    cooldown = false;
-    document.querySelector('[onclick="generateEmails()"]').disabled = false;
-  }, 5000);
+  generateStep();
 }
 
 function sendEmailLog() {
@@ -245,6 +241,7 @@ function generateFakeAccounts() {
     .join("");
 }
 
+// Expose functions to global window for HTML onclick handlers
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
