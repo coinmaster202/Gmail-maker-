@@ -87,7 +87,6 @@
     }
     .section.active {
       display: block;
-      animation: fadeIn 0.4s ease-in-out;
     }
     input, select, textarea, button {
       width: 100%;
@@ -110,7 +109,6 @@
     ul {
       list-style: none;
       padding: 0;
-      animation: slideFadeIn 0.5s ease-out;
     }
     footer {
       text-align: center;
@@ -135,41 +133,47 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       z-index: 1000;
-      transition: background 0.3s, transform 0.2s;
     }
     #theme-toggle:hover {
       background: var(--tab-hover);
       transform: scale(1.1);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideFadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
+
     #dot-possibility p {
       font-weight: bold;
       font-size: 1rem;
-      animation: countUp 0.5s ease;
     }
-    /* Spinner overlay */
+
+    #progress-container {
+      width: 100%;
+      background: #ddd;
+      border-radius: 8px;
+      margin-top: 10px;
+      height: 20px;
+      overflow: hidden;
+      display: none;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--tab-active);
+      transition: width 0.3s;
+    }
+
     #spinner-overlay {
       display: none;
       position: fixed;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       z-index: 9998;
       align-items: center;
       justify-content: center;
     }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid var(--tab-active);
@@ -178,6 +182,7 @@
       height: 40px;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -188,6 +193,7 @@
   <header>
     <h1>One Two Gmail Tool</h1>
   </header>
+
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -201,17 +207,21 @@
       <input type="password" id="access-code" placeholder="Enter access code">
       <small style="color:gray">One-time codes will expire after one use.</small>
       <button onclick="submitAccessCode()">Unlock Tool</button>
+
       <div id="generator-panel" style="display:none;">
         <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
         <div id="live-possibility" style="font-size: 14px; text-align: center; margin-top: -5px;"></div>
+
         <select id="count-select" disabled>
           <option disabled selected>Code-Based Limit</option>
         </select>
-        <div id="dot-possibility" style="text-align:center; font-size:14px;">
-          <div id="progress-container" style="width:100%; background:#ddd; border-radius:8px; margin-top:10px; height:20px; overflow:hidden; display:none;">
-            <div id="progress-bar" style="height:100%; width:0%; background:var(--tab-active); transition: width 0.3s;"></div>
+
+        <div id="dot-possibility">
+          <div id="progress-container">
+            <div id="progress-bar"></div>
           </div>
         </div>
+
         <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
         <button onclick="copyEmails()">Copy All</button>
         <button onclick="downloadEmails()">Download CSV</button>
@@ -246,10 +256,10 @@
     &copy; 2025 One Two Gmail Tool
   </footer>
 
-  <!-- Spinner overlay -->
+  <!-- Spinner Overlay -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
-  <!-- Crash warning modal -->
+  <!-- Crash Warning Modal -->
   <div id="crash-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#fff; max-width:500px; width:90%; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; font-family:'Poppins',sans-serif;">
       <h2 style="color:#b91c1c;">⚠️ Warning</h2>
