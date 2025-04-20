@@ -4,6 +4,17 @@ let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
 
+const MAX_ATTEMPTS = 5;
+const ATTEMPT_KEY = "invalid_attempts";
+const LAST_ATTEMPT_KEY = "last_attempt_time";
+const now = Date.now();
+const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0;
+
+if (now - lastTry > 15 * 60 * 1000) {
+  localStorage.removeItem(ATTEMPT_KEY);
+  localStorage.removeItem(LAST_ATTEMPT_KEY);
+}
+
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
   document.body.classList.remove("rainbow");
@@ -33,10 +44,61 @@ async function submitAccessCode() {
   });
 
   const data = await res.json();
+
   if (!data.valid) {
-    alert(data.reason || "❌ That code is invalid, expired, or already used.");
+    let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0;
+    attempts++;
+    localStorage.setItem(ATTEMPT_KEY, attempts);
+    localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
+
+    if (attempts >= MAX_ATTEMPTS) {
+      document.body.classList.add("locked");
+
+      const modal = document.getElementById("crash-warning-modal");
+      modal.classList.add("locked-mode");
+      modal.style.display = "flex";
+
+      const banner = document.getElementById("breach-banner");
+      const flicker = document.getElementById("lockdown-flicker");
+      banner.style.display = "block";
+      flicker.style.display = "block";
+
+      document.getElementById("access-code").disabled = true;
+
+      modal.querySelector("p").innerHTML = `
+        <strong style="font-size:22px; color:#dc2626;">🚨 CRITICAL SECURITY BREACH</strong><br><br>
+        Your session has been permanently locked due to repeated unauthorized access attempts.<br><br>
+        <span style="color:#b91c1c; font-weight:bold;">🛑 IP address, browser fingerprint, and geolocation have been reported to system security.</span><br><br>
+        Further interaction has been disabled. This incident is under review.<br><br>
+        <em>Close this page immediately.</em>
+      `;
+
+      const scare = document.getElementById("scary-audio");
+      scare.volume = 0.9;
+      scare.play().catch(() => console.warn("Audio autoplay blocked"));
+
+      setTimeout(() => {
+        const thunder = document.getElementById("thunder-audio");
+        thunder.volume = 0.7;
+        thunder.play().catch(() => {});
+      }, 1500);
+
+      setTimeout(() => {
+        console.clear();
+        console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
+        console.warn("Your activity has been recorded.");
+      }, 500);
+
+      return;
+    }
+
+    alert(data.reason || `❌ Invalid code. Attempt ${attempts} of ${MAX_ATTEMPTS}.`);
     return;
   }
+
+  // Valid code
+  localStorage.removeItem(ATTEMPT_KEY);
+  localStorage.removeItem(LAST_ATTEMPT_KEY);
 
   accessMode = data.mode;
   codeUsed = false;
@@ -129,7 +191,7 @@ function generateEmails() {
     start += 1;
     progress.style.width = `${start}%`;
     if (start >= 100) clearInterval(loadingInterval);
-  }, 30); // 3s
+  }, 30);
 
   setTimeout(() => {
     const emails = new Set();
@@ -170,7 +232,7 @@ function generateEmails() {
     genBtn.disabled = true;
     genBtn.style.opacity = "0.5";
     genBtn.textContent = "Code Used";
-  }, 500); // trigger result after slight delay
+  }, 500);
 }
 
 function sendEmailLog() {
@@ -273,6 +335,7 @@ function generateFakeAccounts() {
     `).join("");
 }
 
+// Expose to HTML
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
