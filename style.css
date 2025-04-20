@@ -42,9 +42,7 @@ body {
   padding: 0;
 }
 
-body.locked #main-content,
-body.locked header,
-body.locked footer {
+body.locked #main-content {
   filter: blur(6px) grayscale(1);
   pointer-events: none;
   user-select: none;
@@ -57,13 +55,13 @@ body.locked {
 header {
   background: linear-gradient(to right, var(--tab-bg), var(--tab-active));
   color: white;
-  padding: 30px 20px;
+  padding: 20px;
   text-align: center;
 }
 
 main {
   max-width: 800px;
-  margin: 30px auto;
+  margin: 0 auto;
   background: var(--card);
   border-radius: 12px;
   padding: 20px;
@@ -84,6 +82,7 @@ main {
   cursor: pointer;
   color: white;
   transition: background 0.3s;
+  font-size: 1rem;
 }
 
 .tab:hover {
@@ -97,7 +96,7 @@ main {
 
 .section {
   display: none;
-  padding: 20px;
+  padding: 20px 0;
 }
 
 .section.active {
@@ -110,9 +109,13 @@ input, select, textarea, button {
   padding: 10px;
   margin: 10px 0;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 1rem;
   box-sizing: border-box;
   border: 1px solid var(--input-border);
+}
+
+textarea {
+  min-height: 120px;
 }
 
 button {
@@ -120,17 +123,25 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+  font-weight: 500;
 }
 
 button:hover {
   background: var(--button-hover);
 }
 
+ul {
+  list-style: none;
+  padding: 0;
+  animation: slideFadeIn 0.5s ease-out;
+}
+
 footer {
   text-align: center;
   background: var(--tab-bg);
   color: white;
-  padding: 20px;
+  padding: 15px;
+  font-size: 0.9rem;
 }
 
 #theme-toggle {
@@ -158,6 +169,29 @@ footer {
   transform: scale(1.1);
 }
 
+#dot-possibility p {
+  font-weight: bold;
+  font-size: 1rem;
+  animation: countUp 0.5s ease;
+}
+
+#progress-container {
+  width: 100%;
+  background: #ddd;
+  border-radius: 8px;
+  height: 20px;
+  overflow: hidden;
+  display: none;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--tab-active);
+  transition: width 0.3s;
+}
+
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -168,15 +202,22 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-red {
-  0% { box-shadow: 0 0 10px #dc2626; }
-  50% { box-shadow: 0 0 30px #b91c1c; }
-  100% { box-shadow: 0 0 10px #dc2626; }
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes flicker {
-  0%, 100% { background: rgba(0,0,0,0); }
-  50% { background: rgba(255,0,0,0.6); }
+/* Spinner overlay */
+#spinner-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
 }
 
 .spinner {
@@ -193,6 +234,7 @@ footer {
   100% { transform: rotate(360deg); }
 }
 
+/* Lockdown visuals */
 #crash-warning-modal.locked-mode {
   backdrop-filter: blur(3px);
   animation: pulse-red 1s infinite;
@@ -200,13 +242,25 @@ footer {
   box-shadow: 0 0 50px red;
 }
 
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 10px #dc2626; }
+  50% { box-shadow: 0 0 30px #b91c1c; }
+  100% { box-shadow: 0 0 10px #dc2626; }
+}
+
 .lockdown-flicker {
   animation: flicker 0.5s infinite;
   position: fixed;
   top: 0; left: 0;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   z-index: 99999;
   pointer-events: none;
+}
+
+@keyframes flicker {
+  0%, 100% { background: rgba(0,0,0,0); }
+  50% { background: rgba(255,0,0,0.6); }
 }
 
 #breach-banner {
@@ -223,16 +277,4 @@ footer {
   border-radius: 8px;
   z-index: 99999;
   animation: pulse-red 1.5s infinite;
-}
-
-#spinner-overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 9998;
-  align-items: center;
-  justify-content: center;
 }
