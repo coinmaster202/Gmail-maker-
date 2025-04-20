@@ -59,9 +59,7 @@ async function submitAccessCode() {
       modal.style.display = "flex";
 
       const banner = document.getElementById("breach-banner");
-      const flicker = document.getElementById("lockdown-flicker");
       banner.style.display = "block";
-      flicker.style.display = "block";
 
       document.getElementById("access-code").disabled = true;
 
@@ -88,6 +86,45 @@ async function submitAccessCode() {
         console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
         console.warn("Your activity has been recorded.");
       }, 500);
+
+      // SAFE LOCKDOWN VISUALS
+      const overlay = document.querySelector(".lockdown-overlay-safe");
+      overlay.style.display = "block";
+
+      const terminal = document.getElementById("lockdown-terminal");
+      terminal.style.display = "block";
+      terminal.innerHTML = "";
+
+      let lines = [
+        "ACCESS CODE BREACH DETECTED...",
+        "TRACING IP...",
+        "FINGERPRINT CAPTURED",
+        "REPORTING INCIDENT TO ADMIN...",
+        "SYSTEM LOCKDOWN ACTIVE"
+      ];
+
+      let index = 0;
+      function typeLine() {
+        if (index >= lines.length) {
+          setTimeout(triggerSystemWipe, 1000);
+          return;
+        }
+        const p = document.createElement("p");
+        p.textContent = "";
+        terminal.appendChild(p);
+
+        let charIndex = 0;
+        const interval = setInterval(() => {
+          p.textContent += lines[index][charIndex];
+          charIndex++;
+          if (charIndex >= lines[index].length) {
+            clearInterval(interval);
+            index++;
+            setTimeout(typeLine, 600);
+          }
+        }, 40);
+      }
+      typeLine();
 
       return;
     }
@@ -126,6 +163,29 @@ async function submitAccessCode() {
 
   select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
+}
+
+function triggerSystemWipe() {
+  const wipe = document.getElementById("wipe-screen");
+  const lock = document.getElementById("wipe-lock");
+
+  wipe.style.display = "block";
+  lock.style.display = "block";
+
+  let content = "";
+  let lineCount = 0;
+
+  const wipeInterval = setInterval(() => {
+    content += `Deleting /system/core/file_${lineCount}.bin ... [OK]\n`;
+    wipe.textContent = content;
+    lineCount++;
+
+    if (lineCount >= 40) {
+      clearInterval(wipeInterval);
+      content += "\n\nSYSTEM FILES ERASED.\nLOCKDOWN COMPLETE.";
+      wipe.textContent = content;
+    }
+  }, 80);
 }
 
 function updatePossibilityCounter() {
@@ -335,7 +395,6 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose to HTML
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
