@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
   <style>
     :root {
       --bg: #f3f4f6;
@@ -18,6 +17,7 @@
       --button-hover: #7e22ce;
       --input-border: #ccc;
     }
+
     body.dark {
       --bg: #111827;
       --text: #f9fafb;
@@ -29,6 +29,7 @@
       --button-hover: #5b21b6;
       --input-border: #4b5563;
     }
+
     body.rainbow {
       --bg: linear-gradient(to right, #ff9a9e, #fad0c4);
       --text: #111;
@@ -40,12 +41,7 @@
       --button-hover: #f093fb;
       --input-border: #f5576c;
     }
-    body.locked {
-      filter: blur(6px) grayscale(1);
-      pointer-events: none;
-      user-select: none;
-      overflow: hidden;
-    }
+
     body {
       font-family: 'Poppins', sans-serif;
       background: var(--bg);
@@ -53,12 +49,26 @@
       margin: 0;
       padding: 0;
     }
+
+    body.locked #main-content,
+    body.locked header,
+    body.locked footer {
+      filter: blur(6px) grayscale(1);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    body.locked {
+      overflow: hidden;
+    }
+
     header {
       background: linear-gradient(to right, var(--tab-bg), var(--tab-active));
       color: white;
       padding: 30px 20px;
       text-align: center;
     }
+
     main {
       max-width: 800px;
       margin: 30px auto;
@@ -66,6 +76,7 @@
       border-radius: 12px;
       padding: 20px;
     }
+
     .tabs {
       display: flex;
       flex-wrap: wrap;
@@ -73,6 +84,7 @@
       border-radius: 12px 12px 0 0;
       overflow: hidden;
     }
+
     .tab {
       flex: 1;
       padding: 15px;
@@ -81,21 +93,26 @@
       color: white;
       transition: background 0.3s;
     }
+
     .tab:hover {
       background: var(--tab-hover);
     }
+
     .tab.active {
       background: var(--tab-active);
       font-weight: bold;
     }
+
     .section {
       display: none;
       padding: 20px;
     }
+
     .section.active {
       display: block;
       animation: fadeIn 0.4s ease-in-out;
     }
+
     input, select, textarea, button {
       width: 100%;
       padding: 10px;
@@ -105,26 +122,25 @@
       box-sizing: border-box;
       border: 1px solid var(--input-border);
     }
+
     button {
       background: var(--button-bg);
       color: white;
       border: none;
       cursor: pointer;
     }
+
     button:hover {
       background: var(--button-hover);
     }
-    ul {
-      list-style: none;
-      padding: 0;
-      animation: slideFadeIn 0.5s ease-out;
-    }
+
     footer {
       text-align: center;
       background: var(--tab-bg);
       color: white;
       padding: 20px;
     }
+
     #theme-toggle {
       position: fixed;
       bottom: 20px;
@@ -144,38 +160,33 @@
       z-index: 1000;
       transition: background 0.3s, transform 0.2s;
     }
+
     #theme-toggle:hover {
       background: var(--tab-hover);
       transform: scale(1.1);
     }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
+
     @keyframes slideFadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes countUp {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 10px #dc2626; }
+      50% { box-shadow: 0 0 30px #b91c1c; }
+      100% { box-shadow: 0 0 10px #dc2626; }
     }
-    #dot-possibility p {
-      font-weight: bold;
-      font-size: 1rem;
-      animation: countUp 0.5s ease;
+
+    @keyframes flicker {
+      0%, 100% { background: rgba(0,0,0,0); }
+      50% { background: rgba(255,0,0,0.6); }
     }
-    #spinner-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 9998;
-      align-items: center;
-      justify-content: center;
-    }
+
     .spinner {
       border: 4px solid #f3f3f3;
       border-top: 4px solid var(--tab-active);
@@ -184,23 +195,17 @@
       height: 40px;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    /* Scary lockdown additions */
     #crash-warning-modal.locked-mode {
       backdrop-filter: blur(3px);
       animation: pulse-red 1s infinite;
       border: 4px solid #dc2626;
       box-shadow: 0 0 50px red;
-    }
-
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 10px #dc2626; }
-      50% { box-shadow: 0 0 30px #b91c1c; }
-      100% { box-shadow: 0 0 10px #dc2626; }
     }
 
     .lockdown-flicker {
@@ -210,11 +215,6 @@
       width: 100%; height: 100%;
       z-index: 99999;
       pointer-events: none;
-    }
-
-    @keyframes flicker {
-      0%, 100% { background: rgba(0,0,0,0); }
-      50% { background: rgba(255,0,0,0.6); }
     }
 
     #breach-banner {
@@ -232,75 +232,89 @@
       z-index: 99999;
       animation: pulse-red 1.5s infinite;
     }
+
+    #spinner-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9998;
+      align-items: center;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>One Two Gmail Tool</h1>
-  </header>
+  <div id="main-content">
+    <header>
+      <h1>One Two Gmail Tool</h1>
+    </header>
 
-  <main>
-    <div class="tabs">
-      <div class="tab active" data-tab="generator">Gmail Generator</div>
-      <div class="tab" data-tab="csv">Convert to CSV</div>
-      <div class="tab" data-tab="duplicates">Check Duplicates</div>
-      <div class="tab" data-tab="formatter">Gmail Formatter</div>
-      <div class="tab" data-tab="faker">Fake Generator</div>
-    </div>
-
-    <div class="section active" id="generator">
-      <input type="password" id="access-code" placeholder="Enter access code">
-      <small style="color:gray">One-time codes will expire after one use.</small>
-      <button onclick="submitAccessCode()">Unlock Tool</button>
-      <div id="generator-panel" style="display:none;">
-        <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
-        <div id="live-possibility" style="font-size: 14px; text-align: center; margin-top: -5px;"></div>
-        <select id="count-select" disabled>
-          <option disabled selected>Code-Based Limit</option>
-        </select>
-        <div id="dot-possibility" style="text-align:center; font-size:14px;">
-          <div id="progress-container" style="width:100%; background:#ddd; border-radius:8px; margin-top:10px; height:20px; overflow:hidden; display:none;">
-            <div id="progress-bar" style="height:100%; width:0%; background:var(--tab-active); transition: width 0.3s;"></div>
-          </div>
-        </div>
-        <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
-        <button onclick="copyEmails()">Copy All</button>
-        <button onclick="downloadEmails()">Download CSV</button>
-        <div id="variation-list"></div>
+    <main>
+      <div class="tabs">
+        <div class="tab active" data-tab="generator">Gmail Generator</div>
+        <div class="tab" data-tab="csv">Convert to CSV</div>
+        <div class="tab" data-tab="duplicates">Check Duplicates</div>
+        <div class="tab" data-tab="formatter">Gmail Formatter</div>
+        <div class="tab" data-tab="faker">Fake Generator</div>
       </div>
-    </div>
 
-    <div class="section" id="csv">
-      <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
-      <button onclick="convertToCSV()">Download CSV</button>
-    </div>
+      <div class="section active" id="generator">
+        <input type="password" id="access-code" placeholder="Enter access code">
+        <small style="color:gray">One-time codes will expire after one use.</small>
+        <button onclick="submitAccessCode()">Unlock Tool</button>
+        <div id="generator-panel" style="display:none;">
+          <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
+          <div id="live-possibility" style="font-size: 14px; text-align: center; margin-top: -5px;"></div>
+          <select id="count-select" disabled>
+            <option disabled selected>Code-Based Limit</option>
+          </select>
+          <div id="dot-possibility" style="text-align:center; font-size:14px;">
+            <div id="progress-container" style="width:100%; background:#ddd; border-radius:8px; margin-top:10px; height:20px; overflow:hidden; display:none;">
+              <div id="progress-bar" style="height:100%; width:0%; background:var(--tab-active); transition: width 0.3s;"></div>
+            </div>
+          </div>
+          <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
+          <button onclick="copyEmails()">Copy All</button>
+          <button onclick="downloadEmails()">Download CSV</button>
+          <div id="variation-list"></div>
+        </div>
+      </div>
 
-    <div class="section" id="duplicates">
-      <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
-      <button onclick="checkForDuplicates()">Check</button>
-      <div id="dup-result"></div>
-    </div>
+      <div class="section" id="csv">
+        <textarea id="csv-input" placeholder="Paste emails here..."></textarea>
+        <button onclick="convertToCSV()">Download CSV</button>
+      </div>
 
-    <div class="section" id="formatter">
-      <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
-      <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
-      <div id="format-output"></div>
-    </div>
+      <div class="section" id="duplicates">
+        <textarea id="dup-input" placeholder="Paste emails to check for duplicates..."></textarea>
+        <button onclick="checkForDuplicates()">Check</button>
+        <div id="dup-result"></div>
+      </div>
 
-    <div class="section" id="faker">
-      <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
-      <div id="fake-output"></div>
-    </div>
-  </main>
+      <div class="section" id="formatter">
+        <textarea id="format-input" placeholder="Paste Gmail variations..."></textarea>
+        <button onclick="formatGmailVariations()">Group by Gmail Identity</button>
+        <div id="format-output"></div>
+      </div>
 
-  <footer>
-    &copy; 2025 One Two Gmail Tool
-  </footer>
+      <div class="section" id="faker">
+        <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
+        <div id="fake-output"></div>
+      </div>
+    </main>
+
+    <footer>
+      &copy; 2025 One Two Gmail Tool
+    </footer>
+  </div>
 
   <!-- Spinner overlay -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
-  <!-- Lockdown audio + visuals -->
+  <!-- SECURITY BREACH EFFECTS -->
   <audio id="scary-audio" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_d819d1ed6b.mp3" preload="auto"></audio>
   <audio id="thunder-audio" src="https://cdn.pixabay.com/download/audio/2021/09/28/audio_3ef1b249d0.mp3" preload="auto"></audio>
   <div id="breach-banner">⚠️ SECURITY BREACH DETECTED ⚠️</div>
@@ -319,10 +333,10 @@
     </div>
   </div>
 
-  <!-- Theme toggle -->
+  <!-- Theme Toggle Button -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
 
-  <!-- JavaScript -->
+  <!-- Main Script -->
   <script src="script.js" defer></script>
 </body>
 </html>
