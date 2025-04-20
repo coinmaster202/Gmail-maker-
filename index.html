@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
   <style>
     :root {
       --bg: #f3f4f6;
@@ -38,6 +39,12 @@
       --button-bg: #f5576c;
       --button-hover: #f093fb;
       --input-border: #f5576c;
+    }
+    body.locked {
+      filter: blur(6px) grayscale(1);
+      pointer-events: none;
+      user-select: none;
+      overflow: hidden;
     }
     body {
       font-family: 'Poppins', sans-serif;
@@ -158,7 +165,6 @@
       font-size: 1rem;
       animation: countUp 0.5s ease;
     }
-    /* Spinner overlay */
     #spinner-overlay {
       display: none;
       position: fixed;
@@ -182,12 +188,57 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* Scary lockdown additions */
+    #crash-warning-modal.locked-mode {
+      backdrop-filter: blur(3px);
+      animation: pulse-red 1s infinite;
+      border: 4px solid #dc2626;
+      box-shadow: 0 0 50px red;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 10px #dc2626; }
+      50% { box-shadow: 0 0 30px #b91c1c; }
+      100% { box-shadow: 0 0 10px #dc2626; }
+    }
+
+    .lockdown-flicker {
+      animation: flicker 0.5s infinite;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 99999;
+      pointer-events: none;
+    }
+
+    @keyframes flicker {
+      0%, 100% { background: rgba(0,0,0,0); }
+      50% { background: rgba(255,0,0,0.6); }
+    }
+
+    #breach-banner {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #b91c1c;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      padding: 10px 30px;
+      border-radius: 8px;
+      z-index: 99999;
+      animation: pulse-red 1.5s infinite;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>One Two Gmail Tool</h1>
   </header>
+
   <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -249,6 +300,12 @@
   <!-- Spinner overlay -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
+  <!-- Lockdown audio + visuals -->
+  <audio id="scary-audio" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_d819d1ed6b.mp3" preload="auto"></audio>
+  <audio id="thunder-audio" src="https://cdn.pixabay.com/download/audio/2021/09/28/audio_3ef1b249d0.mp3" preload="auto"></audio>
+  <div id="breach-banner">⚠️ SECURITY BREACH DETECTED ⚠️</div>
+  <div id="lockdown-flicker" class="lockdown-flicker" style="display:none;"></div>
+
   <!-- Crash warning modal -->
   <div id="crash-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
     <div style="background:#fff; max-width:500px; width:90%; padding:25px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.3); text-align:center; font-family:'Poppins',sans-serif;">
@@ -262,7 +319,10 @@
     </div>
   </div>
 
+  <!-- Theme toggle -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
+
+  <!-- JavaScript -->
   <script src="script.js" defer></script>
 </body>
 </html>
