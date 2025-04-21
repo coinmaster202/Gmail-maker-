@@ -37,7 +37,7 @@
               <div id="progress-bar"></div>
             </div>
           </div>
-          <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
+          <button id="generate-button">Generate Gmail Variations</button>
           <button onclick="copyEmails()">📋 Copy All</button>
           <button onclick="downloadEmails()">⬇️ Download All</button>
           <button onclick="autoFastDownload()" style="background:#10b981; margin-top:10px;">⚡ Auto Fast Download</button>
@@ -84,15 +84,38 @@
   <div id="breach-banner">⚠️ SECURITY BREACH DETECTED ⚠️</div>
   <div class="lockdown-flicker" id="lockdown-flicker" style="display:none;"></div>
 
-  <!-- Warning Modal -->
+  <!-- Fake Terminal Log During Lockdown -->
+  <div id="lockdown-terminal" style="
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: black;
+    color: #0f0;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 20px;
+    border: 2px solid #0f0;
+    border-radius: 8px;
+    z-index: 99999;
+    white-space: pre-line;
+    line-height: 1.5;
+    box-shadow: 0 0 20px lime;
+  "></div>
+
+  <!-- Crash warning modal -->
   <div id="crash-warning-modal" style="display:none;">
     <div>
       <h2>⚠️ Warning</h2>
       <p>
         You’ve entered a Gmail name that can generate over <strong>50,000 variations</strong>.<br>
-        This may cause the site to freeze or crash, especially on phones.<br><br>
-        <button onclick="dismissCrashWarning()">I Understand</button>
+        This may cause the site to freeze or crash, especially on phones.<br>
+        Large CSV files may also fail to open properly on mobile devices.
       </p>
+      <button onclick="dismissCrashWarning()">I Understand</button>
     </div>
   </div>
 
