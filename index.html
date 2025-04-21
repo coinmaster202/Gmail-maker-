@@ -5,16 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    html, body { max-width: 100%; overflow-x: hidden; }
-    main { padding: 15px; }
-    button, input, select, textarea { font-size: 1rem; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="main-content">
-    <header><h1 style="text-align:center;">One Two Gmail Tool</h1></header>
+    <header>
+      <h1 style="font-size: 1.5rem; text-align: center;">One Two Gmail Tool</h1>
+    </header>
+
     <main>
       <div class="tabs">
         <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -25,11 +23,11 @@
       </div>
 
       <div class="section active" id="generator">
-        <input type="password" id="access-code" placeholder="Enter access code" />
+        <input type="password" id="access-code" placeholder="Enter access code">
         <small style="color:gray">One-time codes expire after use.</small>
         <button onclick="submitAccessCode()">Unlock Tool</button>
         <div id="generator-panel" style="display:none;">
-          <input type="text" id="gmail-user" placeholder="Gmail username (no @gmail.com)" oninput="updatePossibilityCounter()" />
+          <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
           <div id="live-possibility"></div>
           <select id="count-select" disabled>
             <option disabled selected>Code-Based Limit</option>
@@ -40,11 +38,9 @@
             </div>
           </div>
           <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
-          <button onclick="copyEmails()">Copy All</button>
-          <button onclick="downloadEmails(100)">Download First 100</button>
-          <button onclick="downloadEmails(500)">Download First 500</button>
-          <button onclick="downloadEmails()">Download All</button>
-          <button onclick="autoFastDownload()" style="background:#10b981; margin-top:10px;">Auto Fast Download</button>
+          <button onclick="copyEmails()">📋 Copy All</button>
+          <button onclick="downloadEmails()">⬇️ Download All</button>
+          <button onclick="autoFastDownload()" style="background:#10b981; margin-top:10px;">⚡ Auto Fast Download</button>
           <div id="variation-list"></div>
         </div>
       </div>
@@ -72,41 +68,38 @@
       </div>
     </main>
 
-    <footer><p style="text-align:center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p></footer>
+    <footer>
+      <p style="text-align: center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p>
+    </footer>
   </div>
 
-  <!-- Spinner overlay -->
+  <!-- Spinner -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
-  <!-- Audio -->
+  <!-- Audio for lockdown -->
   <audio id="scary-audio" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_d819d1ed6b.mp3" preload="auto"></audio>
   <audio id="thunder-audio" src="https://cdn.pixabay.com/download/audio/2021/09/28/audio_3ef1b249d0.mp3" preload="auto"></audio>
 
-  <!-- Lockdown elements -->
+  <!-- Lockdown Effects -->
   <div id="breach-banner">⚠️ SECURITY BREACH DETECTED ⚠️</div>
-  <div class="lockdown-overlay-safe" style="display:none;"></div>
-  <div id="lockdown-terminal" style="display:none;"></div>
-  <div id="wipe-screen"></div>
-  <div id="wipe-lock" style="display:none;"></div>
-  <div id="webcam-banner" style="display:none;"></div>
+  <div class="lockdown-flicker" id="lockdown-flicker" style="display:none;"></div>
 
-  <!-- Crash warning modal -->
+  <!-- Warning Modal -->
   <div id="crash-warning-modal" style="display:none;">
     <div>
       <h2>⚠️ Warning</h2>
       <p>
         You’ve entered a Gmail name that can generate over <strong>50,000 variations</strong>.<br>
-        This may freeze or crash the site (especially on phones).<br>
-        Large CSVs may also fail on mobile.
+        This may cause the site to freeze or crash, especially on phones.<br><br>
+        <button onclick="dismissCrashWarning()">I Understand</button>
       </p>
-      <button onclick="dismissCrashWarning()">I Understand</button>
     </div>
   </div>
 
-  <!-- Theme switch -->
+  <!-- Theme toggle -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
 
-  <!-- JS -->
+  <!-- Main Script -->
   <script src="script.js" defer></script>
 </body>
 </html>
