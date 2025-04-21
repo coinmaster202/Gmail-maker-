@@ -1,7 +1,19 @@
-let worker;
+let codeUsed = false;
 let latestVariations = [];
 let accessMode = '';
-let codeUsed = false;
+let cooldown = false;
+let hasShownCrashWarning = false;
+
+const MAX_ATTEMPTS = 5;
+const ATTEMPT_KEY = "invalid_attempts";
+const LAST_ATTEMPT_KEY = "last_attempt_time";
+const now = Date.now();
+const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0;
+
+if (now - lastTry > 15 * 60 * 1000) {
+  localStorage.removeItem(ATTEMPT_KEY);
+  localStorage.removeItem(LAST_ATTEMPT_KEY);
+}
 
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
@@ -33,10 +45,23 @@ async function submitAccessCode() {
 
   const data = await res.json();
 
-  if (!data.valid) return alert("❌ Invalid code.");
+  if (!data.valid) {
+    let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0;
+    attempts++;
+    localStorage.setItem(ATTEMPT_KEY, attempts);
+    localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
 
+    if (attempts >= MAX_ATTEMPTS) return triggerLockdown();
+
+    alert(data.reason || `❌ Invalid code. Attempt ${attempts} of ${MAX_ATTEMPTS}.`);
+    return;
+  }
+
+  localStorage.removeItem(ATTEMPT_KEY);
+  localStorage.removeItem(LAST_ATTEMPT_KEY);
   accessMode = data.mode;
   codeUsed = false;
+  cooldown = false;
 
   const select = document.getElementById("count-select");
   document.body.classList.remove("rainbow");
@@ -54,12 +79,50 @@ async function submitAccessCode() {
     select.innerHTML = `<option disabled selected>500 Variations Allowed</option>`;
   } else if (accessMode === "v1000") {
     select.innerHTML = `<option disabled selected>1000 Variations Allowed</option>`;
+  } else {
+    select.innerHTML = `<option disabled selected>Unknown Mode</option>`;
   }
 
   select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
 }
 
+function triggerLockdown() {
+  document.body.classList.add("locked");
+
+  const modal = document.getElementById("crash-warning-modal");
+  modal.classList.add("locked-mode");
+  modal.style.display = "flex";
+
+  const banner = document.getElementById("breach-banner");
+  banner.style.display = "block";
+
+  document.getElementById("access-code").disabled = true;
+
+  modal.querySelector("p").innerHTML = `
+    <strong style="font-size:22px; color:#dc2626;">🚨 CRITICAL SECURITY BREACH</strong><br><br>
+    Your session has been permanently locked due to repeated unauthorized access attempts.<br><br>
+    <span style="color:#b91c1c; font-weight:bold;">🛑 IP address, browser fingerprint, and geolocation have been reported to system security.</span><br><br>
+    Further interaction has been disabled. This incident is under review.<br><br>
+    <em>Close this page immediately.</em>
+  `;
+
+  const scare = document.getElementById("scary-audio");
+  scare.volume = 0.9;
+  scare.play().catch(() => {});
+
+  setTimeout(() => {
+    const thunder = document.getElementById("thunder-audio");
+    thunder.volume = 0.7;
+    thunder.play().catch(() => {});
+  }, 1500);
+
+  setTimeout(() => {
+    console.clear();
+    console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
+    console.warn("Your activity has been recorded.");
+  }, 500);
+}
 function generateEmailsWithWorker() {
   const username = document.getElementById("gmail-user").value.trim();
   if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid username");
@@ -68,12 +131,11 @@ function generateEmailsWithWorker() {
     accessMode === "master" || accessMode === "unlimited" ? 5000000 :
     accessMode === "v1000" ? 1000 :
     accessMode === "v500" ? 500 :
-    accessMode === "v200" ? 200 :
-    accessMode === "rainbow" ? 200 : 200;
+    accessMode === "v200" || accessMode === "rainbow" ? 200 : 200;
 
   if (worker) worker.terminate();
 
-  worker = new Worker("worker.js");
+  worker = new Worker("/worker.js");
   document.getElementById("spinner-overlay").style.display = "flex";
 
   const progressWrap = document.getElementById("progress-container");
@@ -112,6 +174,36 @@ function generateEmailsWithWorker() {
       codeUsed = true;
     }
   };
+
+  worker.onerror = (err) => {
+    console.error("Worker error:", err.message);
+    alert("Worker failed to load. Check if worker.js is hosted correctly.");
+  };
+}
+
+function updatePossibilityCounter() {
+  const input = document.getElementById("gmail-user").value.trim();
+  const clean = input.replace(/[^a-zA-Z0-9]/g, "");
+  const display = document.getElementById("live-possibility");
+
+  if (clean.length < 2) {
+    display.innerHTML = "";
+    hasShownCrashWarning = false;
+    return;
+  }
+
+  const positions = clean.length - 1;
+  const total = Math.pow(2, positions);
+  display.innerHTML = `🧮 Possibilities: <strong>${total.toLocaleString()}</strong>`;
+
+  if (total >= 50000 && !hasShownCrashWarning) {
+    hasShownCrashWarning = true;
+    document.getElementById("crash-warning-modal").style.display = "flex";
+  }
+}
+
+function dismissCrashWarning() {
+  document.getElementById("crash-warning-modal").style.display = "none";
 }
 
 function copyEmails() {
@@ -125,7 +217,6 @@ function downloadEmails() {
   a.download = "gmail_variations.csv";
   a.click();
 }
-
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
@@ -201,7 +292,7 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose
+// Expose core functions to HTML
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmailsWithWorker;
 window.copyEmails = copyEmails;
@@ -210,3 +301,5 @@ window.convertToCSV = convertToCSV;
 window.checkForDuplicates = checkForDuplicates;
 window.formatGmailVariations = formatGmailVariations;
 window.generateFakeAccounts = generateFakeAccounts;
+window.updatePossibilityCounter = updatePossibilityCounter;
+window.dismissCrashWarning = dismissCrashWarning;
