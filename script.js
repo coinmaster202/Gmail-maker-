@@ -4,6 +4,7 @@ let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
+let unlockClickCount = 0;
 
 const MAX_ATTEMPTS = 5;
 const ATTEMPT_KEY = "invalid_attempts";
@@ -38,6 +39,24 @@ document.querySelectorAll(".tab").forEach(btn => {
 
 // ACCESS CODE HANDLER
 async function submitAccessCode() {
+  unlockClickCount++;
+
+  if (unlockClickCount === 5) {
+    try {
+      document.getElementById("scary-audio").volume = 0.6;
+      document.getElementById("glitch-audio").volume = 0.4;
+      document.getElementById("bass-drop-audio").volume = 0.6;
+
+      document.getElementById("scary-audio").play().catch(() => {});
+      document.getElementById("glitch-audio").play().catch(() => {});
+      setTimeout(() => {
+        document.getElementById("bass-drop-audio").play().catch(() => {});
+      }, 1000);
+    } catch (err) {
+      console.warn("Audio failed to play:", err);
+    }
+  }
+
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Enter a code");
 
@@ -91,7 +110,6 @@ async function submitAccessCode() {
     return;
   }
 
-  // Valid code
   localStorage.removeItem(ATTEMPT_KEY);
   localStorage.removeItem(LAST_ATTEMPT_KEY);
 
@@ -134,13 +152,11 @@ function triggerSystemWipe() {
   terminal.style.display = "block";
   document.body.classList.add("locked");
 
-  // Start scary audio
   document.getElementById("glitch-audio").play().catch(() => {});
   setTimeout(() => {
     document.getElementById("bass-drop-audio").play().catch(() => {});
   }, 2500);
 
-  // Creepy typing sequence
   const lines = [
     "[SECURITY BREACH CONFIRMED]",
     "TRACING ROUTE TO INTRUDER...",
@@ -167,7 +183,6 @@ function triggerSystemWipe() {
       startCountdown(60);
     }
 
-    // Flash creepy eye randomly
     if (Math.random() < 0.2) {
       eye.style.display = "block";
       setTimeout(() => eye.style.display = "none", 500);
@@ -194,7 +209,6 @@ function startCountdown(seconds) {
   }, 1000);
 }
 
-// GENERATOR FUNCTIONS
 function updatePossibilityCounter() {
   const input = document.getElementById("gmail-user").value.trim();
   const clean = input.replace(/[^a-zA-Z0-9]/g, "");
@@ -292,7 +306,6 @@ function generateEmails() {
   }, 500);
 }
 
-// COPY / EXPORT
 function sendEmailLog() {
   const accessCode = document.getElementById("access-code").value.trim();
   const username = document.getElementById("gmail-user").value.trim();
@@ -306,12 +319,14 @@ function sendEmailLog() {
 }
 
 function copyEmails() {
-  navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
+  navigator.clipboard.writeText(latestVariations.join("
+")).then(() => alert("Copied to clipboard!"));
 }
 
 function downloadEmails(limit = latestVariations.length) {
   const sliced = latestVariations.slice(0, limit);
-  const blob = new Blob([sliced.join("\n")], { type: "text/csv" });
+  const blob = new Blob([sliced.join("
+")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "gmail_variations.csv";
@@ -320,8 +335,11 @@ function downloadEmails(limit = latestVariations.length) {
 
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
-  const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
-  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const lines = input.split(/
+?
+/).filter(l => l.includes("@"));
+  const blob = new Blob([lines.join("
+")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "converted_emails.csv";
@@ -330,7 +348,9 @@ function convertToCSV() {
 
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().toLowerCase();
-  const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
+  const emails = input.split(/
+?
+/).map(e => e.trim()).filter(e => e.includes("@"));
   const map = {}, dups = [];
 
   emails.forEach(email => {
@@ -347,7 +367,9 @@ function checkForDuplicates() {
 
 function formatGmailVariations() {
   const input = document.getElementById("format-input").value.trim();
-  const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
+  const emails = input.split(/
+?
+/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
   const map = {};
 
   emails.forEach(email => {
@@ -393,7 +415,6 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose functions globally
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
