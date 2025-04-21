@@ -37,6 +37,27 @@ document.querySelectorAll(".tab").forEach(btn => {
   };
 });
 
+function updatePossibilityCounter() {
+  const input = document.getElementById("gmail-user").value.trim();
+  const clean = input.replace(/[^a-zA-Z0-9]/g, "");
+  const display = document.getElementById("live-possibility");
+
+  if (clean.length < 2) {
+    display.innerHTML = "";
+    hasShownCrashWarning = false;
+    return;
+  }
+
+  const positions = clean.length - 1;
+  const total = Math.pow(2, positions);
+  display.innerHTML = `🧮 Possibilities: <strong>${total.toLocaleString()}</strong>`;
+
+  if (total >= 50000 && !hasShownCrashWarning) {
+    hasShownCrashWarning = true;
+    document.getElementById("crash-warning-modal").style.display = "flex";
+  }
+}
+
 // ACCESS CODE HANDLER
 async function submitAccessCode() {
   unlockClickCount++;
