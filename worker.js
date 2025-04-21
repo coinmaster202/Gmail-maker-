@@ -1,6 +1,5 @@
 // worker.js
 
-// Listen for messages from main thread
 self.onmessage = function (e) {
   const { username, max } = e.data;
 
@@ -18,14 +17,14 @@ self.onmessage = function (e) {
         result += ".";
       }
     }
+
     results.push(result + "@gmail.com");
 
-    // Optional: periodically notify progress
+    // Optional progress reporting every 100k
     if (i % 100000 === 0) {
       self.postMessage({ progress: i, partial: results.length });
     }
   }
 
-  // Final post back to main thread
   self.postMessage({ done: true, emails: results });
 };
