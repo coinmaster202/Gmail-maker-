@@ -207,12 +207,6 @@ footer {
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes pulse-red-terminal {
-  0%   { box-shadow: 0 0 10px red; border-color: #b91c1c; }
-  50%  { box-shadow: 0 0 40px red; border-color: #dc2626; }
-  100% { box-shadow: 0 0 10px red; border-color: #7f1d1d; }
-}
-
 /* Spinner overlay */
 #spinner-overlay {
   display: none;
@@ -240,7 +234,6 @@ footer {
   100% { transform: rotate(360deg); }
 }
 
-/* Lockdown / Terminal / Wipe Effects */
 #breach-banner {
   display: none;
   position: fixed;
@@ -254,81 +247,11 @@ footer {
   padding: 10px 30px;
   border-radius: 8px;
   z-index: 99999;
-  animation: pulse-red-terminal 1.5s infinite;
+  animation: pulse-red 1.5s infinite;
 }
 
-.lockdown-overlay-safe {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(88, 0, 0, 0.7);
-  z-index: 9999;
-  pointer-events: none;
-}
-
-#lockdown-terminal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #000;
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  font-size: 16px;
-  padding: 20px;
-  border-radius: 8px;
-  border: 3px solid #dc2626;
-  box-shadow: 0 0 40px red;
-  z-index: 100000;
-  max-width: 90vw;
-  max-height: 60vh;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  display: none;
-  animation: pulse-red-terminal 2s infinite ease-in-out;
-  line-height: 1.6;
-}
-
-#wipe-screen {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: black;
-  color: #0f0;
-  font-family: monospace;
-  font-size: 16px;
-  z-index: 100001;
-  padding: 20px;
-  display: none;
-  overflow: hidden;
-  white-space: pre-wrap;
-}
-
-#wipe-lock {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 100002;
-  background: transparent;
-  pointer-events: all;
-}
-
-/* Camera stream banner */
-#webcam-banner {
-  display: none;
-  position: fixed;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #7f1d1d;
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
-  padding: 6px 20px;
-  z-index: 99999;
-  border-radius: 6px;
-  box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 10px #dc2626; }
+  50% { box-shadow: 0 0 30px #b91c1c; }
+  100% { box-shadow: 0 0 10px #dc2626; }
 }
