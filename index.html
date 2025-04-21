@@ -6,13 +6,17 @@
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { max-width: 100%; overflow-x: hidden; }
+    main { padding: 15px; }
+    button, input, select, textarea { font-size: 1rem; }
+  </style>
 </head>
 <body>
   <div id="main-content">
     <header>
-      <h1 style="font-size: 1.5rem; text-align: center;">One Two Gmail Tool</h1>
+      <h1 style="font-size: 1.5rem; text-align:center;">One Two Gmail Tool</h1>
     </header>
-
     <main>
       <div class="tabs">
         <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -24,7 +28,7 @@
 
       <div class="section active" id="generator">
         <input type="password" id="access-code" placeholder="Enter access code">
-        <small style="color:gray">One-time codes expire after use.</small>
+        <small style="color:gray">One-time codes will expire after one use.</small>
         <button onclick="submitAccessCode()">Unlock Tool</button>
         <div id="generator-panel" style="display:none;">
           <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
@@ -37,10 +41,12 @@
               <div id="progress-bar"></div>
             </div>
           </div>
-          <button id="generate-button">Generate Gmail Variations</button>
-          <button onclick="copyEmails()">📋 Copy All</button>
-          <button onclick="downloadEmails()">⬇️ Download All</button>
-          <button onclick="autoFastDownload()" style="background:#10b981; margin-top:10px;">⚡ Auto Fast Download</button>
+          <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
+          <button onclick="copyEmails()">Copy All</button>
+          <button onclick="downloadEmails(100)">Download First 100</button>
+          <button onclick="downloadEmails(500)">Download First 500</button>
+          <button onclick="downloadEmails()">Download All</button>
+          <button onclick="autoFastDownload()" style="background:#10b981; margin-top:10px;">Auto Fast Download</button>
           <div id="variation-list"></div>
         </div>
       </div>
@@ -69,44 +75,25 @@
     </main>
 
     <footer>
-      <p style="text-align: center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p>
+      <p style="text-align:center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p>
     </footer>
   </div>
 
-  <!-- Spinner -->
+  <!-- Spinner overlay -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
-  <!-- Audio for lockdown -->
+  <!-- Audio -->
   <audio id="scary-audio" src="https://cdn.pixabay.com/download/audio/2022/03/16/audio_d819d1ed6b.mp3" preload="auto"></audio>
   <audio id="thunder-audio" src="https://cdn.pixabay.com/download/audio/2021/09/28/audio_3ef1b249d0.mp3" preload="auto"></audio>
 
-  <!-- Lockdown Effects -->
+  <!-- Lockdown elements -->
   <div id="breach-banner">⚠️ SECURITY BREACH DETECTED ⚠️</div>
-  <div class="lockdown-flicker" id="lockdown-flicker" style="display:none;"></div>
+  <div class="lockdown-overlay-safe" style="display:none;"></div>
+  <div id="lockdown-terminal" style="display:none;"></div>
+  <div id="wipe-screen"></div>
+  <div id="wipe-lock" style="display:none;"></div>
 
-  <!-- Fake Terminal Log During Lockdown -->
-  <div id="lockdown-terminal" style="
-    display: none;
-    position: fixed;
-    top: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    background: black;
-    color: #0f0;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 20px;
-    border: 2px solid #0f0;
-    border-radius: 8px;
-    z-index: 99999;
-    white-space: pre-line;
-    line-height: 1.5;
-    box-shadow: 0 0 20px lime;
-  "></div>
-
-  <!-- Crash warning modal -->
+  <!-- Crash warning -->
   <div id="crash-warning-modal" style="display:none;">
     <div>
       <h2>⚠️ Warning</h2>
@@ -119,10 +106,10 @@
     </div>
   </div>
 
-  <!-- Theme toggle -->
+  <!-- Theme switch -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
 
-  <!-- Main Script -->
+  <!-- Scripts -->
   <script src="script.js" defer></script>
 </body>
 </html>
