@@ -52,6 +52,7 @@ body.locked #main-content {
 
 body.locked {
   overflow: hidden;
+  animation: glitch 0.2s infinite;
 }
 
 header {
@@ -215,6 +216,15 @@ footer {
   100% { box-shadow: 0 0 10px red; border-color: #7f1d1d; }
 }
 
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(2px, -1px); }
+  60% { transform: translate(-1px, -2px); }
+  80% { transform: translate(1px, 2px); }
+  100% { transform: translate(0); }
+}
+
 /* ===== LOADER ===== */
 #spinner-overlay {
   display: none;
@@ -322,4 +332,32 @@ footer {
   z-index: 100002;
   background: transparent;
   pointer-events: all;
+}
+
+#bsod {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #0000aa;
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  padding: 40px;
+  z-index: 999999;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+#creepy-eye {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Eye_icon_black.svg/1024px-Eye_icon_black.svg.png') no-repeat center;
+  background-size: contain;
+  z-index: 999999;
+  display: none;
+  animation: pulse-red-terminal 1.5s infinite;
 }
