@@ -3,6 +3,7 @@ let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
+let worker = null;
 
 const MAX_ATTEMPTS = 5;
 const ATTEMPT_KEY = "invalid_attempts";
@@ -32,7 +33,6 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.getElementById(tab.dataset.tab).classList.add("active");
   };
 });
-
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Enter a code");
@@ -79,8 +79,6 @@ async function submitAccessCode() {
     select.innerHTML = `<option disabled selected>500 Variations Allowed</option>`;
   } else if (accessMode === "v1000") {
     select.innerHTML = `<option disabled selected>1000 Variations Allowed</option>`;
-  } else {
-    select.innerHTML = `<option disabled selected>Unknown Mode</option>`;
   }
 
   select.disabled = true;
@@ -117,15 +115,42 @@ function triggerLockdown() {
     thunder.play().catch(() => {});
   }, 1500);
 
-  setTimeout(() => {
-    console.clear();
-    console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
-    console.warn("Your activity has been recorded.");
-  }, 500);
+  const terminal = document.getElementById("lockdown-terminal");
+  terminal.style.display = "block";
+  terminal.innerHTML = "";
+
+  const lines = [
+    "ACCESS CODE BREACH DETECTED...",
+    "TRACING IP...",
+    "DEVICE FINGERPRINTING...",
+    "REPORTING INCIDENT TO ADMIN...",
+    "INITIATING LOCKDOWN...",
+    "SENDING SYSTEM ALERT..."
+  ];
+
+  let index = 0;
+  function typeLine() {
+    if (index >= lines.length) return;
+    const p = document.createElement("p");
+    p.textContent = "";
+    terminal.appendChild(p);
+
+    let charIndex = 0;
+    const interval = setInterval(() => {
+      p.textContent += lines[index][charIndex];
+      charIndex++;
+      if (charIndex >= lines[index].length) {
+        clearInterval(interval);
+        index++;
+        setTimeout(typeLine, 600);
+      }
+    }, 40);
+  }
+  typeLine();
 }
 function generateEmailsWithWorker() {
   const username = document.getElementById("gmail-user").value.trim();
-  if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid username");
+  if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
 
   const max =
     accessMode === "master" || accessMode === "unlimited" ? 5000000 :
@@ -134,10 +159,9 @@ function generateEmailsWithWorker() {
     accessMode === "v200" || accessMode === "rainbow" ? 200 : 200;
 
   if (worker) worker.terminate();
-
   worker = new Worker("/worker.js");
-  document.getElementById("spinner-overlay").style.display = "flex";
 
+  document.getElementById("spinner-overlay").style.display = "flex";
   const progressWrap = document.getElementById("progress-container");
   const progress = document.getElementById("progress-bar");
   progressWrap.style.display = "block";
@@ -177,7 +201,7 @@ function generateEmailsWithWorker() {
 
   worker.onerror = (err) => {
     console.error("Worker error:", err.message);
-    alert("Worker failed to load. Check if worker.js is hosted correctly.");
+    alert("Worker failed to load. Make sure worker.js is accessible.");
   };
 }
 
@@ -292,7 +316,7 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose core functions to HTML
+// Export functions to window
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmailsWithWorker;
 window.copyEmails = copyEmails;
