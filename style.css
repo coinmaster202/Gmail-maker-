@@ -1,4 +1,3 @@
-/* ===== THEMES ===== */
 :root {
   --bg: #f3f4f6;
   --text: #1f2937;
@@ -35,7 +34,6 @@ body.rainbow {
   --input-border: #f5576c;
 }
 
-/* ===== BASE STYLES ===== */
 body {
   font-family: 'Poppins', sans-serif;
   background: var(--bg);
@@ -193,7 +191,7 @@ footer {
   transition: width 0.3s;
 }
 
-/* ===== ANIMATIONS ===== */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -215,7 +213,7 @@ footer {
   100% { box-shadow: 0 0 10px red; border-color: #7f1d1d; }
 }
 
-/* ===== LOADER ===== */
+/* Spinner overlay */
 #spinner-overlay {
   display: none;
   position: fixed;
@@ -242,13 +240,7 @@ footer {
   100% { transform: rotate(360deg); }
 }
 
-/* ===== LOCKDOWN / BREACH ===== */
-#crash-warning-modal.locked-mode {
-  backdrop-filter: blur(3px);
-  border: 4px solid #dc2626;
-  box-shadow: 0 0 50px red;
-}
-
+/* Lockdown / Terminal / Wipe Effects */
 #breach-banner {
   display: none;
   position: fixed;
@@ -322,4 +314,21 @@ footer {
   z-index: 100002;
   background: transparent;
   pointer-events: all;
+}
+
+/* Camera stream banner */
+#webcam-banner {
+  display: none;
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #7f1d1d;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 6px 20px;
+  z-index: 99999;
+  border-radius: 6px;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
 }
