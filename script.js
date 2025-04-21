@@ -65,53 +65,12 @@ async function submitAccessCode() {
       banner.style.display = "block";
       document.getElementById("access-code").disabled = true;
 
-      modal.querySelector("p").innerHTML = `
-        <strong style="font-size:22px; color:#dc2626;">🚨 CRITICAL SECURITY BREACH</strong><br><br>
-        Your session has been permanently locked due to repeated unauthorized access attempts.<br><br>
-        <span style="color:#b91c1c; font-weight:bold;">🛑 IP address, browser fingerprint, and geolocation have been reported to system security.</span><br><br>
-        Further interaction has been disabled. This incident is under review.<br><br>
-        <em>Close this page immediately.</em>
-      `;
-
       document.querySelector(".lockdown-overlay-safe").style.display = "block";
       const terminal = document.getElementById("lockdown-terminal");
       terminal.style.display = "block";
       terminal.innerHTML = `<div style="color:#ff3333; font-size:20px; font-weight:bold; text-align:center; margin-bottom:10px;">
         [!!] SYSTEM OVERRIDE INITIATED
       </div>`;
-
-      const lines = [
-        "ACCESS BREACH DETECTED",
-        "TRACING IP: [PENDING]",
-        "RUNNING BIOS INTEGRITY CHECK... [FAILED]",
-        "UNAUTHORIZED ENTITY: UNKNOWN",
-        "RUNNING COUNTERMEASURES...",
-        ">>>>> SYSTEM LOCKDOWN ACTIVE <<<<<",
-        "[ERROR 0x00FF] CORE DUMP INITIATED",
-        "TERMINATION SCHEDULED IN T-60 SECONDS",
-        "STAY STILL",
-        "WE SEE YOU."
-      ];
-
-      let i = 0;
-      function typeLine() {
-        if (i >= lines.length) return setTimeout(triggerSystemWipe, 1000);
-        const p = document.createElement("p");
-        p.style.margin = "0 0 6px";
-        p.textContent = "";
-        terminal.appendChild(p);
-        let j = 0;
-        const interval = setInterval(() => {
-          p.textContent += lines[i][j];
-          j++;
-          if (j >= lines[i].length) {
-            clearInterval(interval);
-            i++;
-            setTimeout(typeLine, 700);
-          }
-        }, 40 + Math.random() * 30);
-      }
-      typeLine();
 
       document.getElementById("scary-audio").play().catch(() => {});
       setTimeout(() => {
@@ -123,6 +82,8 @@ async function submitAccessCode() {
         console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
         console.warn("Your activity has been recorded.");
       }, 500);
+
+      triggerSystemWipe();
       return;
     }
 
@@ -162,24 +123,75 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
-// TERMINAL WIPE FUNCTION
+// FEAR MODE 2.0
 function triggerSystemWipe() {
+  const terminal = document.getElementById("lockdown-terminal");
   const wipe = document.getElementById("wipe-screen");
-  const lock = document.getElementById("wipe-lock");
-  wipe.style.display = "block";
-  lock.style.display = "block";
-  let content = "";
-  let lineCount = 0;
-  const wipeInterval = setInterval(() => {
-    content += `Deleting /system/core/file_${lineCount}.bin ... [OK]\n`;
-    wipe.textContent = content;
-    lineCount++;
-    if (lineCount >= 40) {
-      clearInterval(wipeInterval);
-      content += "\n\nSYSTEM FILES ERASED.\nLOCKDOWN COMPLETE.";
-      wipe.textContent = content;
+  const bsod = document.getElementById("bsod");
+  const eye = document.getElementById("creepy-eye");
+
+  terminal.innerHTML = "";
+  terminal.style.display = "block";
+  document.body.classList.add("locked");
+
+  // Start scary audio
+  document.getElementById("glitch-audio").play().catch(() => {});
+  setTimeout(() => {
+    document.getElementById("bass-drop-audio").play().catch(() => {});
+  }, 2500);
+
+  // Creepy typing sequence
+  const lines = [
+    "[SECURITY BREACH CONFIRMED]",
+    "TRACING ROUTE TO INTRUDER...",
+    "• IP: 192.168.13.37",
+    "• Location: Romania 🇷🇴",
+    "• Device: Windows NT 10.0 | Chrome",
+    "ACTIVATING COUNTERMEASURES...",
+    "ACCESSING WEBCAM... ACCESS GRANTED ✅",
+    "SNAPSHOT SENT TO: /security/blacklist",
+    "DEPLOYING CORE PURGE SEQUENCE...",
+    "LOCKING OUT USER...",
+    "SYSTEM SELF-DESTRUCT IN: 60"
+  ];
+
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < lines.length) {
+      const p = document.createElement("p");
+      p.textContent = lines[i];
+      terminal.appendChild(p);
+      i++;
+    } else {
+      clearInterval(interval);
+      startCountdown(60);
     }
-  }, 80);
+
+    // Flash creepy eye randomly
+    if (Math.random() < 0.2) {
+      eye.style.display = "block";
+      setTimeout(() => eye.style.display = "none", 500);
+    }
+  }, 800);
+}
+
+function startCountdown(seconds) {
+  const terminal = document.getElementById("lockdown-terminal");
+  let time = seconds;
+
+  const countdownInterval = setInterval(() => {
+    const last = terminal.querySelector("p:last-child");
+    if (last) last.textContent = `SYSTEM SELF-DESTRUCT IN: ${time}`;
+    time--;
+
+    if (time <= 0) {
+      clearInterval(countdownInterval);
+      terminal.style.display = "none";
+      document.getElementById("wipe-screen").style.display = "none";
+      document.getElementById("creepy-eye").style.display = "none";
+      document.getElementById("bsod").style.display = "block";
+    }
+  }, 1000);
 }
 
 // GENERATOR FUNCTIONS
@@ -297,8 +309,9 @@ function copyEmails() {
   navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
-function downloadEmails() {
-  const blob = new Blob([latestVariations.join("\n")], { type: "text/csv" });
+function downloadEmails(limit = latestVariations.length) {
+  const sliced = latestVariations.slice(0, limit);
+  const blob = new Blob([sliced.join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "gmail_variations.csv";
@@ -315,7 +328,6 @@ function convertToCSV() {
   a.click();
 }
 
-// DUPLICATES
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().toLowerCase();
   const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
@@ -333,7 +345,6 @@ function checkForDuplicates() {
     dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
 }
 
-// FORMATTER
 function formatGmailVariations() {
   const input = document.getElementById("format-input").value.trim();
   const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
@@ -353,7 +364,6 @@ function formatGmailVariations() {
   document.getElementById("format-output").innerHTML = output || "No valid Gmail addresses found.";
 }
 
-// FAKE ACCOUNTS
 function generateFakeAccounts() {
   const firstNames = ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fay", "Gabe", "Hana"];
   const lastNames = ["Smith", "Johnson", "Lee", "Brown", "Taylor", "Martinez", "Clark", "Lewis"];
@@ -383,7 +393,7 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose to window
+// Expose functions globally
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
