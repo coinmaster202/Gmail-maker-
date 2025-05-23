@@ -56,33 +56,6 @@ async function submitAccessCode() {
     localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
 
     if (attempts >= MAX_ATTEMPTS) {
-      document.body.classList.add("locked");
-
-      const modal = document.getElementById("crash-warning-modal");
-      modal.classList.add("locked-mode");
-      modal.style.display = "flex";
-      const banner = document.getElementById("breach-banner");
-      banner.style.display = "block";
-      document.getElementById("access-code").disabled = true;
-
-      document.querySelector(".lockdown-overlay-safe").style.display = "block";
-      const terminal = document.getElementById("lockdown-terminal");
-      terminal.style.display = "block";
-      terminal.innerHTML = `<div style="color:#ff3333; font-size:20px; font-weight:bold; text-align:center; margin-bottom:10px;">
-        [!!] SYSTEM OVERRIDE INITIATED
-      </div>`;
-
-      document.getElementById("scary-audio").play().catch(() => {});
-      setTimeout(() => {
-        document.getElementById("thunder-audio").play().catch(() => {});
-      }, 1500);
-
-      setTimeout(() => {
-        console.clear();
-        console.warn("%cSECURITY BREACH DETECTED", "color: red; font-size: 28px; font-weight: bold;");
-        console.warn("Your activity has been recorded.");
-      }, 500);
-
       triggerSystemWipe();
       return;
     }
@@ -91,7 +64,6 @@ async function submitAccessCode() {
     return;
   }
 
-  // Valid code
   localStorage.removeItem(ATTEMPT_KEY);
   localStorage.removeItem(LAST_ATTEMPT_KEY);
 
@@ -121,77 +93,6 @@ async function submitAccessCode() {
 
   select.disabled = true;
   document.getElementById("generator-panel").style.display = "block";
-}
-
-// FEAR MODE 2.0
-function triggerSystemWipe() {
-  const terminal = document.getElementById("lockdown-terminal");
-  const wipe = document.getElementById("wipe-screen");
-  const bsod = document.getElementById("bsod");
-  const eye = document.getElementById("creepy-eye");
-
-  terminal.innerHTML = "";
-  terminal.style.display = "block";
-  document.body.classList.add("locked");
-
-  // Start scary audio
-  document.getElementById("glitch-audio").play().catch(() => {});
-  setTimeout(() => {
-    document.getElementById("bass-drop-audio").play().catch(() => {});
-  }, 2500);
-
-  // Creepy typing sequence
-  const lines = [
-    "[SECURITY BREACH CONFIRMED]",
-    "TRACING ROUTE TO INTRUDER...",
-    "• IP: 192.168.13.37",
-    "• Location: Romania 🇷🇴",
-    "• Device: Windows NT 10.0 | Chrome",
-    "ACTIVATING COUNTERMEASURES...",
-    "ACCESSING WEBCAM... ACCESS GRANTED ✅",
-    "SNAPSHOT SENT TO: /security/blacklist",
-    "DEPLOYING CORE PURGE SEQUENCE...",
-    "LOCKING OUT USER...",
-    "SYSTEM SELF-DESTRUCT IN: 60"
-  ];
-
-  let i = 0;
-  const interval = setInterval(() => {
-    if (i < lines.length) {
-      const p = document.createElement("p");
-      p.textContent = lines[i];
-      terminal.appendChild(p);
-      i++;
-    } else {
-      clearInterval(interval);
-      startCountdown(60);
-    }
-
-    // Flash creepy eye randomly
-    if (Math.random() < 0.2) {
-      eye.style.display = "block";
-      setTimeout(() => eye.style.display = "none", 500);
-    }
-  }, 800);
-}
-
-function startCountdown(seconds) {
-  const terminal = document.getElementById("lockdown-terminal");
-  let time = seconds;
-
-  const countdownInterval = setInterval(() => {
-    const last = terminal.querySelector("p:last-child");
-    if (last) last.textContent = `SYSTEM SELF-DESTRUCT IN: ${time}`;
-    time--;
-
-    if (time <= 0) {
-      clearInterval(countdownInterval);
-      terminal.style.display = "none";
-      document.getElementById("wipe-screen").style.display = "none";
-      document.getElementById("creepy-eye").style.display = "none";
-      document.getElementById("bsod").style.display = "block";
-    }
-  }, 1000);
 }
 
 // GENERATOR FUNCTIONS
@@ -270,6 +171,9 @@ function generateEmails() {
 
     counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
 
+    const zipBtn = document.getElementById("zip-download-btn");
+    zipBtn.style.display = latestVariations.length > 2000 ? "inline-block" : "none";
+
     const listToShow = latestVariations.length > 2000 ? latestVariations.slice(0, 500) : latestVariations;
     const previewMessage = latestVariations.length > 2000
       ? `Showing first 500 of ${latestVariations.length} emails (large result set).`
@@ -316,6 +220,41 @@ function downloadEmails(limit = latestVariations.length) {
   a.href = URL.createObjectURL(blob);
   a.download = "gmail_variations.csv";
   a.click();
+}
+
+// ZIP EXPORT LOGIC
+function openZipModal() {
+  document.getElementById("zip-modal").style.display = "flex";
+}
+
+function closeZipModal() {
+  document.getElementById("zip-modal").style.display = "none";
+}
+
+function downloadAsZip() {
+  const filename = document.getElementById("zip-filename").value.trim() || "gmail_variations";
+  const chunkSize = Math.min(
+    Math.max(parseInt(document.getElementById("zip-chunk-size").value) || 10000, 1000),
+    50000
+  );
+
+  const zip = new JSZip();
+  const chunks = Math.ceil(latestVariations.length / chunkSize);
+
+  for (let i = 0; i < chunks; i++) {
+    const start = i * chunkSize;
+    const end = start + chunkSize;
+    const slice = latestVariations.slice(start, end).join("\n");
+    zip.file(`${filename}_part_${i + 1}.csv`, slice);
+  }
+
+  zip.generateAsync({ type: "blob" }).then(blob => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${filename}.zip`;
+    a.click();
+    closeZipModal();
+  });
 }
 
 function convertToCSV() {
@@ -393,7 +332,7 @@ function generateFakeAccounts() {
     `).join("");
 }
 
-// Expose functions globally
+// Expose functions
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
@@ -404,3 +343,6 @@ window.formatGmailVariations = formatGmailVariations;
 window.generateFakeAccounts = generateFakeAccounts;
 window.updatePossibilityCounter = updatePossibilityCounter;
 window.dismissCrashWarning = dismissCrashWarning;
+window.openZipModal = openZipModal;
+window.downloadAsZip = downloadAsZip;
+window.closeZipModal = closeZipModal;
