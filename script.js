@@ -95,6 +95,21 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
+// GENERATE PASSWORDS
+function generatePasswordsForEmails(emailList) {
+  const passwords = {};
+  emailList.forEach(email => {
+    const clean = email.replace(/[^a-zA-Z0-9]/g, '');
+    let sum = 0;
+    for (let i = 0; i < clean.length; i++) {
+      sum += clean.charCodeAt(i) * (i + 1);
+    }
+    const pass = (sum % 1000000).toString().padStart(6, "0");
+    passwords[email] = pass;
+  });
+  return passwords;
+}
+
 // GENERATOR FUNCTIONS
 function updatePossibilityCounter() {
   const input = document.getElementById("gmail-user").value.trim();
@@ -166,10 +181,12 @@ function generateEmails() {
     }
 
     latestVariations = Array.from(emails);
+    const passwords = generatePasswordsForEmails(latestVariations);
+
     spinner.style.display = "none";
     progressWrap.style.display = "none";
 
-    counterEl.innerHTML = `<p>✅ ${emails.size.toLocaleString()} Gmail variations generated.</p>`;
+    counterEl.innerHTML = `<p>✅ ${latestVariations.length.toLocaleString()} Gmail variations generated.</p>`;
 
     const zipBtn = document.getElementById("zip-download-btn");
     zipBtn.style.display = latestVariations.length > 2000 ? "inline-block" : "none";
@@ -181,7 +198,7 @@ function generateEmails() {
 
     document.getElementById("variation-list").innerHTML = `
       <p>${previewMessage}</p>
-      <ul>${listToShow.map(e => `<li>${e}</li>`).join("")}</ul>
+      <ul>${listToShow.map(e => `<li>${e} <span style="color:gray;">| Pass: ${passwords[e]}</span></li>`).join("")}</ul>
       <button onclick="copyEmails()">Copy All</button>
       <button onclick="downloadEmails()">Download All as CSV</button>
     `;
@@ -210,15 +227,19 @@ function sendEmailLog() {
 }
 
 function copyEmails() {
-  navigator.clipboard.writeText(latestVariations.join("\n")).then(() => alert("Copied to clipboard!"));
+  const passwords = generatePasswordsForEmails(latestVariations);
+  const lines = latestVariations.map(email => `${email} | Pass: ${passwords[email]}`);
+  navigator.clipboard.writeText(lines.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
 function downloadEmails(limit = latestVariations.length) {
   const sliced = latestVariations.slice(0, limit);
-  const blob = new Blob([sliced.join("\n")], { type: "text/csv" });
+  const passwords = generatePasswordsForEmails(sliced);
+  const lines = sliced.map(email => `${email},${passwords[email]}`);
+  const blob = new Blob([["Email,Password", ...lines].join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "gmail_variations.csv";
+  a.download = "gmail_variations_with_passwords.csv";
   a.click();
 }
 
@@ -239,13 +260,14 @@ function downloadAsZip() {
   );
 
   const zip = new JSZip();
+  const passwords = generatePasswordsForEmails(latestVariations);
   const chunks = Math.ceil(latestVariations.length / chunkSize);
 
   for (let i = 0; i < chunks; i++) {
     const start = i * chunkSize;
     const end = start + chunkSize;
-    const slice = latestVariations.slice(start, end).join("\n");
-    zip.file(`${filename}_part_${i + 1}.csv`, slice);
+    const slice = latestVariations.slice(start, end).map(email => `${email},${passwords[email]}`).join("\n");
+    zip.file(`${filename}_part_${i + 1}.csv`, ["Email,Password", slice].join("\n"));
   }
 
   zip.generateAsync({ type: "blob" }).then(blob => {
@@ -257,92 +279,12 @@ function downloadAsZip() {
   });
 }
 
-function convertToCSV() {
-  const input = document.getElementById("csv-input").value.trim();
-  const lines = input.split(/\r?\n/).filter(l => l.includes("@"));
-  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "converted_emails.csv";
-  a.click();
-}
-
-function checkForDuplicates() {
-  const input = document.getElementById("dup-input").value.trim().toLowerCase();
-  const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@"));
-  const map = {}, dups = [];
-
-  emails.forEach(email => {
-    map[email] = (map[email] || 0) + 1;
-  });
-
-  for (let e in map) {
-    if (map[e] > 1) dups.push(`${e} (x${map[e]})`);
-  }
-
-  document.getElementById("dup-result").innerHTML =
-    dups.length ? "<ul><li>" + dups.join("</li><li>") + "</li></ul>" : "No duplicates found.";
-}
-
-function formatGmailVariations() {
-  const input = document.getElementById("format-input").value.trim();
-  const emails = input.split(/\r?\n/).map(e => e.trim()).filter(e => e.includes("@gmail.com"));
-  const map = {};
-
-  emails.forEach(email => {
-    const user = email.split("@")[0].replace(/\./g, "").toLowerCase();
-    if (!map[user]) map[user] = [];
-    map[user].push(email);
-  });
-
-  let output = "";
-  for (const user in map) {
-    output += `<h4>${user}@gmail.com</h4><ul><li>${map[user].join("</li><li>")}</li></ul>`;
-  }
-
-  document.getElementById("format-output").innerHTML = output || "No valid Gmail addresses found.";
-}
-
-function generateFakeAccounts() {
-  const firstNames = ["Alice", "Bob", "Charlie", "Dana", "Eli", "Fay", "Gabe", "Hana"];
-  const lastNames = ["Smith", "Johnson", "Lee", "Brown", "Taylor", "Martinez", "Clark", "Lewis"];
-  const countries = ["US", "UK", "Germany", "Canada", "Australia", "India"];
-  const fakeList = [];
-
-  for (let i = 0; i < 10; i++) {
-    const first = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const last = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const user = (first + last + Math.floor(Math.random() * 1000)).toLowerCase();
-    const email = user + "@gmail.com";
-    const password = Math.random().toString(36).slice(-10);
-    const dob = `${Math.floor(Math.random() * 28) + 1}/${Math.floor(Math.random() * 12) + 1}/${Math.floor(Math.random() * 20) + 1985}`;
-    const country = countries[Math.floor(Math.random() * countries.length)];
-    const avatar = `https://api.dicebear.com/7.x/pixel-art/svg?seed=${user}`;
-
-    fakeList.push({ name: `${first} ${last}`, email, password, dob, country, avatar });
-  }
-
-  document.getElementById("fake-output").innerHTML = fakeList
-    .map(acc => `
-      <div style="margin-bottom:10px;">
-        <img src="${acc.avatar}" width="40" style="vertical-align:middle; border-radius:50%;"> 
-        <strong>${acc.name}</strong> - ${acc.email}<br>
-        <small>Pass: ${acc.password} | DOB: ${acc.dob} | ${acc.country}</small>
-      </div>
-    `).join("");
-}
-
 // Expose functions
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
 window.downloadEmails = downloadEmails;
-window.convertToCSV = convertToCSV;
-window.checkForDuplicates = checkForDuplicates;
-window.formatGmailVariations = formatGmailVariations;
-window.generateFakeAccounts = generateFakeAccounts;
-window.updatePossibilityCounter = updatePossibilityCounter;
-window.dismissCrashWarning = dismissCrashWarning;
 window.openZipModal = openZipModal;
 window.downloadAsZip = downloadAsZip;
-window.closeZipModal = closeZipModal;
+window.dismissCrashWarning = dismissCrashWarning;
+window.updatePossibilityCounter = updatePossibilityCounter;
