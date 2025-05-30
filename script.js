@@ -26,7 +26,7 @@ document.getElementById("theme-toggle").onclick = () => {
 };
 if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-// TAB SWITCHING
+// TAB SWITCHING ✅ FIXED
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -34,7 +34,7 @@ document.querySelectorAll(".tab").forEach(btn => {
     btn.classList.add("active");
     document.getElementById(btn.dataset.tab).classList.add("active");
   };
-};
+});
 
 // ACCESS CODE HANDLER
 async function submitAccessCode() {
@@ -274,7 +274,7 @@ function downloadAsZip() {
   });
 }
 
-// Expose functions
+// ✅ EXPORT FUNCTIONS TO GLOBAL SCOPE
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
