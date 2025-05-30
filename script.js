@@ -5,7 +5,7 @@ let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
 
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 const ATTEMPT_KEY = "invalid_attempts";
 const LAST_ATTEMPT_KEY = "last_attempt_time";
 const now = Date.now();
