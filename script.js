@@ -5,7 +5,7 @@ let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
 
-const MAX_ATTEMPTS = 5;
+const MAX_ATTEMPTS = 3;
 const ATTEMPT_KEY = "invalid_attempts";
 const LAST_ATTEMPT_KEY = "last_attempt_time";
 const now = Date.now();
@@ -34,7 +34,7 @@ document.querySelectorAll(".tab").forEach(btn => {
     btn.classList.add("active");
     document.getElementById(btn.dataset.tab).classList.add("active");
   };
-});
+};
 
 // ACCESS CODE HANDLER
 async function submitAccessCode() {
@@ -95,17 +95,12 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
-// GENERATE PASSWORDS
+// RANDOM PASSWORDS PER EMAIL
 function generatePasswordsForEmails(emailList) {
   const passwords = {};
   emailList.forEach(email => {
-    const clean = email.replace(/[^a-zA-Z0-9]/g, '');
-    let sum = 0;
-    for (let i = 0; i < clean.length; i++) {
-      sum += clean.charCodeAt(i) * (i + 1);
-    }
-    const pass = (sum % 1000000).toString().padStart(6, "0");
-    passwords[email] = pass;
+    const randomPass = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit random
+    passwords[email] = randomPass;
   });
   return passwords;
 }
@@ -243,7 +238,7 @@ function downloadEmails(limit = latestVariations.length) {
   a.click();
 }
 
-// ZIP EXPORT LOGIC
+// ZIP EXPORT
 function openZipModal() {
   document.getElementById("zip-modal").style.display = "flex";
 }
