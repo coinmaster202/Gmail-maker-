@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Access Code Debug</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f3f4f6;
+      color: #111;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      margin-top: 10px;
+    }
+    .log {
+      margin-top: 20px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h2>🔐 Access Code Debug Tool</h2>
+  <input type="password" id="access-code" placeholder="Enter access code">
+  <button onclick="submitAccessCode()">Submit Code</button>
+
+  <div id="result" class="log"></div>
+
+  <script>
+    async function submitAccessCode() {
+      const code = document.getElementById("access-code").value.trim();
+      const resultBox = document.getElementById("result");
+
+      if (!code) {
+        resultBox.innerHTML = "⚠️ Please enter a code.";
+        return;
+      }
+
+      resultBox.innerHTML = "🔄 Sending code...";
+
+      try {
+        const res = await fetch("/api/validate-access-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code })
+        });
+
+        const data = await res.json();
+        resultBox.innerHTML = `<strong>✅ Server Response:</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+      } catch (err) {
+        resultBox.innerHTML = "❌ Error: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
