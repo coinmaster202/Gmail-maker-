@@ -26,7 +26,7 @@ document.getElementById("theme-toggle").onclick = () => {
 };
 if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-// TAB SWITCHING ✅ FIXED
+// TAB SWITCHING
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -72,10 +72,12 @@ async function submitAccessCode() {
   cooldown = false;
 
   const select = document.getElementById("count-select");
+  const toggleContainer = document.getElementById("password-toggle-container");
   document.body.classList.remove("rainbow");
 
   if (accessMode === "master" || accessMode === "unlimited") {
     select.innerHTML = `<option disabled selected>Unlimited Variations</option>`;
+    if (accessMode === "master") toggleContainer.style.display = "block";
   } else if (accessMode === "rainbow") {
     document.body.classList.add("rainbow");
     select.innerHTML = `<option disabled selected>Up to 200 (Rainbow)</option>`;
@@ -95,7 +97,7 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
-// RANDOM PASSWORDS PER EMAIL
+// RANDOM PASSWORDS
 function generatePasswordsForEmails(emailList) {
   const passwords = {};
   emailList.forEach(email => {
@@ -105,7 +107,7 @@ function generatePasswordsForEmails(emailList) {
   return passwords;
 }
 
-// GENERATOR FUNCTIONS
+// GENERATOR
 function updatePossibilityCounter() {
   const input = document.getElementById("gmail-user").value.trim();
   const clean = input.replace(/[^a-zA-Z0-9]/g, "");
@@ -123,12 +125,12 @@ function updatePossibilityCounter() {
 
   if (total >= 50000 && !hasShownCrashWarning) {
     hasShownCrashWarning = true;
-    document.getElementById("crash-warning-modal").style.display = "flex";
+    document.getElementById("crash-warning-modal")?.style.display = "flex";
   }
 }
 
 function dismissCrashWarning() {
-  document.getElementById("crash-warning-modal").style.display = "none";
+  document.getElementById("crash-warning-modal")?.style.display = "none";
 }
 
 function generateEmails() {
@@ -176,7 +178,9 @@ function generateEmails() {
     }
 
     latestVariations = Array.from(emails);
-    const passwords = generatePasswordsForEmails(latestVariations);
+
+    const usePasswords = accessMode === "master" && document.getElementById("password-toggle")?.checked;
+    const passwords = usePasswords ? generatePasswordsForEmails(latestVariations) : {};
 
     spinner.style.display = "none";
     progressWrap.style.display = "none";
@@ -193,7 +197,7 @@ function generateEmails() {
 
     document.getElementById("variation-list").innerHTML = `
       <p>${previewMessage}</p>
-      <ul>${listToShow.map(e => `<li>${e} <span style="color:gray;">| Pass: ${passwords[e]}</span></li>`).join("")}</ul>
+      <ul>${listToShow.map(e => `<li>${e}${usePasswords ? ` <span style="color:gray;">| Pass: ${passwords[e]}</span>` : ''}</li>`).join("")}</ul>
       <button onclick="copyEmails()">Copy All</button>
       <button onclick="downloadEmails()">Download All as CSV</button>
     `;
@@ -222,19 +226,22 @@ function sendEmailLog() {
 }
 
 function copyEmails() {
-  const passwords = generatePasswordsForEmails(latestVariations);
-  const lines = latestVariations.map(email => `${email} | Pass: ${passwords[email]}`);
+  const usePasswords = accessMode === "master" && document.getElementById("password-toggle")?.checked;
+  const passwords = usePasswords ? generatePasswordsForEmails(latestVariations) : {};
+  const lines = latestVariations.map(email => `${email}${usePasswords ? ` | Pass: ${passwords[email]}` : ''}`);
   navigator.clipboard.writeText(lines.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
 function downloadEmails(limit = latestVariations.length) {
+  const usePasswords = accessMode === "master" && document.getElementById("password-toggle")?.checked;
   const sliced = latestVariations.slice(0, limit);
-  const passwords = generatePasswordsForEmails(sliced);
-  const lines = sliced.map(email => `${email},${passwords[email]}`);
-  const blob = new Blob([["Email,Password", ...lines].join("\n")], { type: "text/csv" });
+  const passwords = usePasswords ? generatePasswordsForEmails(sliced) : {};
+  const lines = sliced.map(email => `${email}${usePasswords ? `,${passwords[email]}` : ''}`);
+  const header = usePasswords ? "Email,Password" : "Email";
+  const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "gmail_variations_with_passwords.csv";
+  a.download = "gmail_variations.csv";
   a.click();
 }
 
@@ -249,20 +256,21 @@ function closeZipModal() {
 
 function downloadAsZip() {
   const filename = document.getElementById("zip-filename").value.trim() || "gmail_variations";
-  const chunkSize = Math.min(
-    Math.max(parseInt(document.getElementById("zip-chunk-size").value) || 10000, 1000),
-    50000
-  );
+  const chunkSize = Math.min(Math.max(parseInt(document.getElementById("zip-chunk-size").value) || 10000, 1000), 50000);
+  const usePasswords = accessMode === "master" && document.getElementById("password-toggle")?.checked;
 
   const zip = new JSZip();
-  const passwords = generatePasswordsForEmails(latestVariations);
+  const passwords = usePasswords ? generatePasswordsForEmails(latestVariations) : {};
   const chunks = Math.ceil(latestVariations.length / chunkSize);
 
   for (let i = 0; i < chunks; i++) {
     const start = i * chunkSize;
     const end = start + chunkSize;
-    const slice = latestVariations.slice(start, end).map(email => `${email},${passwords[email]}`).join("\n");
-    zip.file(`${filename}_part_${i + 1}.csv`, ["Email,Password", slice].join("\n"));
+    const slice = latestVariations.slice(start, end).map(email =>
+      usePasswords ? `${email},${passwords[email]}` : email
+    ).join("\n");
+    const header = usePasswords ? "Email,Password" : "Email";
+    zip.file(`${filename}_part_${i + 1}.csv`, [header, slice].join("\n"));
   }
 
   zip.generateAsync({ type: "blob" }).then(blob => {
@@ -274,7 +282,7 @@ function downloadAsZip() {
   });
 }
 
-// ✅ EXPORT FUNCTIONS TO GLOBAL SCOPE
+// GLOBAL EXPORT
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
