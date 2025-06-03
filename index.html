@@ -6,42 +6,29 @@
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    html, body { max-width: 100%; overflow-x: hidden; }
-    main { padding: 15px; }
-    button, input, select, textarea { font-size: 1rem; }
-
-    #zip-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 10001;
-    }
-
-    #zip-modal-content {
+    #chat-box {
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px;
       background: var(--card);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-
-    #zip-modal-content input {
+      border-radius: 8px;
       margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .chat-entry { margin: 5px 0; }
+    .chat-entry.user { text-align: right; }
+    .chat-entry.assistant { text-align: left; }
+    #password-toggle-container {
+      display: none;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div id="main-content">
-    <header>
-      <h1 style="font-size: 1.5rem; text-align:center;">One Two Gmail Tool</h1>
-    </header>
+    <header><h1 style="font-size: 1.5rem; text-align:center;">One Two Gmail Tool</h1></header>
     <main>
       <div class="tabs">
         <div class="tab active" data-tab="generator">Gmail Generator</div>
@@ -49,12 +36,14 @@
         <div class="tab" data-tab="duplicates">Check Duplicates</div>
         <div class="tab" data-tab="formatter">Gmail Formatter</div>
         <div class="tab" data-tab="faker">Fake Generator</div>
+        <div class="tab" data-tab="helpdesk">AI Help Desk</div>
       </div>
 
       <div class="section active" id="generator">
         <input type="password" id="access-code" placeholder="Enter access code">
         <small style="color:gray">One-time codes will expire after one use.</small>
         <button onclick="submitAccessCode()">Unlock Tool</button>
+
         <div id="generator-panel" style="display:none;">
           <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)" oninput="updatePossibilityCounter()">
           <div id="live-possibility"></div>
@@ -65,6 +54,9 @@
             <div id="progress-container">
               <div id="progress-bar"></div>
             </div>
+          </div>
+          <div id="password-toggle-container">
+            <label><input type="checkbox" id="password-toggle" checked> Include random passwords</label>
           </div>
           <button id="generate-button" onclick="generateEmails()">Generate Gmail Variations</button>
           <button onclick="copyEmails()">Copy All</button>
@@ -97,17 +89,19 @@
         <button onclick="generateFakeAccounts()">Generate Fake Accounts</button>
         <div id="fake-output"></div>
       </div>
+
+      <div class="section" id="helpdesk">
+        <div id="chat-box"></div>
+        <input type="text" id="chat-input" placeholder="Ask something...">
+        <button onclick="sendToAssistant()">Send</button>
+      </div>
     </main>
 
-    <footer>
-      <p style="text-align:center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p>
-    </footer>
+    <footer><p style="text-align:center; font-size: 0.9rem;">&copy; 2025 One Two Gmail Tool</p></footer>
   </div>
 
-  <!-- Spinner overlay -->
   <div id="spinner-overlay"><div class="spinner"></div></div>
 
-  <!-- ZIP Modal -->
   <div id="zip-modal">
     <div id="zip-modal-content">
       <h3>Export as ZIP</h3>
@@ -118,13 +112,30 @@
     </div>
   </div>
 
-  <!-- Audio and Lockdown Elements Omitted for Brevity (keep as-is) -->
-
-  <!-- Theme Toggle -->
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
-
-  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js" defer></script>
+  <script>
+    async function sendToAssistant() {
+      const input = document.getElementById("chat-input");
+      const box = document.getElementById("chat-box");
+      const userMsg = input.value.trim();
+      if (!userMsg) return;
+
+      box.innerHTML += `<div class='chat-entry user'>${userMsg}</div>`;
+      input.value = "";
+
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userMsg })
+      });
+
+      const data = await res.json();
+      const reply = data.reply || "Error getting reply.";
+      box.innerHTML += `<div class='chat-entry assistant'>${marked.parse(reply)}</div>`;
+      box.scrollTop = box.scrollHeight;
+    }
+  </script>
 </body>
 </html>
