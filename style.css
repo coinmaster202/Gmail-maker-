@@ -222,6 +222,30 @@ footer {
   font-size: 1rem;
 }
 
+/* ===== AI HELP DESK ===== */
+#chat-box {
+  background: var(--card);
+  padding: 10px;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--input-border);
+}
+
+.chat-entry {
+  margin: 6px 0;
+}
+
+.chat-entry.user {
+  text-align: right;
+  color: var(--tab-active);
+}
+
+.chat-entry.assistant {
+  text-align: left;
+  color: var(--text);
+}
+
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -279,6 +303,3 @@ footer {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-/* ===== LOCKDOWN ===== */
-/* (No change, keep all lockdown styles as-is) */
