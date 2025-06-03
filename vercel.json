@@ -2,16 +2,18 @@
   "version": 2,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
+    { "src": "debug.html", "use": "@vercel/static" },
     { "src": "script.js", "use": "@vercel/static" },
     { "src": "style.css", "use": "@vercel/static" },
-    { "src": "api/ask.js", "use": "@vercel/node" },
     { "src": "api/validate-access-code.js", "use": "@vercel/node" },
-    { "src": "api/log-variations.js", "use": "@vercel/node" }
+    { "src": "api/log-variations.js", "use": "@vercel/node" },
+    { "src": "api/ask.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.js" },
     { "src": "/script.js", "headers": { "Content-Type": "application/javascript" }, "dest": "/script.js" },
     { "src": "/style.css", "headers": { "Content-Type": "text/css" }, "dest": "/style.css" },
+    { "src": "/debug", "dest": "/debug.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
