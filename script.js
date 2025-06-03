@@ -1,22 +1,10 @@
-// INIT STATE
 let codeUsed = false;
 let latestVariations = [];
 let accessMode = '';
 let cooldown = false;
 let hasShownCrashWarning = false;
 
-const MAX_ATTEMPTS = 5;
-const ATTEMPT_KEY = "invalid_attempts";
-const LAST_ATTEMPT_KEY = "last_attempt_time";
-const now = Date.now();
-const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0;
-
-if (now - lastTry > 15 * 60 * 1000) {
-  localStorage.removeItem(ATTEMPT_KEY);
-  localStorage.removeItem(LAST_ATTEMPT_KEY);
-}
-
-// THEME TOGGLE
+// Theme toggle
 document.getElementById("theme-toggle").onclick = () => {
   document.body.classList.toggle("dark");
   document.body.classList.remove("rainbow");
@@ -26,7 +14,7 @@ document.getElementById("theme-toggle").onclick = () => {
 };
 if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
 
-// TAB SWITCHING
+// Tabs
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -36,7 +24,7 @@ document.querySelectorAll(".tab").forEach(btn => {
   };
 });
 
-// ACCESS CODE HANDLER
+// Access Code Handling
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Enter a code");
@@ -48,24 +36,10 @@ async function submitAccessCode() {
   });
 
   const data = await res.json();
-
   if (!data.valid) {
-    let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0;
-    attempts++;
-    localStorage.setItem(ATTEMPT_KEY, attempts);
-    localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
-
-    if (attempts >= MAX_ATTEMPTS) {
-      triggerSystemWipe();
-      return;
-    }
-
-    alert(data.reason || `❌ Invalid code. Attempt ${attempts} of ${MAX_ATTEMPTS}.`);
+    alert("❌ Invalid code");
     return;
   }
-
-  localStorage.removeItem(ATTEMPT_KEY);
-  localStorage.removeItem(LAST_ATTEMPT_KEY);
 
   accessMode = data.mode;
   codeUsed = false;
@@ -75,9 +49,11 @@ async function submitAccessCode() {
   const toggleContainer = document.getElementById("password-toggle-container");
   document.body.classList.remove("rainbow");
 
-  if (accessMode === "master" || accessMode === "unlimited") {
+  if (accessMode === "master") {
     select.innerHTML = `<option disabled selected>Unlimited Variations</option>`;
-    if (accessMode === "master") toggleContainer.style.display = "block";
+    toggleContainer.style.display = "block";
+  } else if (accessMode === "unlimited") {
+    select.innerHTML = `<option disabled selected>Unlimited Variations</option>`;
   } else if (accessMode === "rainbow") {
     document.body.classList.add("rainbow");
     select.innerHTML = `<option disabled selected>Up to 200 (Rainbow)</option>`;
@@ -97,17 +73,7 @@ async function submitAccessCode() {
   document.getElementById("generator-panel").style.display = "block";
 }
 
-// RANDOM PASSWORDS
-function generatePasswordsForEmails(emailList) {
-  const passwords = {};
-  emailList.forEach(email => {
-    const randomPass = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit random
-    passwords[email] = randomPass;
-  });
-  return passwords;
-}
-
-// GENERATOR
+// Gmail Variation Generator
 function updatePossibilityCounter() {
   const input = document.getElementById("gmail-user").value.trim();
   const clean = input.replace(/[^a-zA-Z0-9]/g, "");
@@ -131,6 +97,15 @@ function updatePossibilityCounter() {
 
 function dismissCrashWarning() {
   document.getElementById("crash-warning-modal")?.style.display = "none";
+}
+
+function generatePasswordsForEmails(emailList) {
+  const passwords = {};
+  emailList.forEach(email => {
+    const randomPass = Math.floor(100000 + Math.random() * 900000).toString();
+    passwords[email] = randomPass;
+  });
+  return passwords;
 }
 
 function generateEmails() {
@@ -178,7 +153,6 @@ function generateEmails() {
     }
 
     latestVariations = Array.from(emails);
-
     const usePasswords = accessMode === "master" && document.getElementById("password-toggle")?.checked;
     const passwords = usePasswords ? generatePasswordsForEmails(latestVariations) : {};
 
@@ -212,7 +186,6 @@ function generateEmails() {
   }, 500);
 }
 
-// COPY / EXPORT
 function sendEmailLog() {
   const accessCode = document.getElementById("access-code").value.trim();
   const username = document.getElementById("gmail-user").value.trim();
@@ -282,7 +255,7 @@ function downloadAsZip() {
   });
 }
 
-// GLOBAL EXPORT
+// Global bindings
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
