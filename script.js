@@ -1,20 +1,37 @@
-// INIT STATE let latestVariations = []; let enablePasswords = false; let accessMode = ''; let codeUsed = false; const MAX_ATTEMPTS = 5; const ATTEMPT_KEY = "invalid_attempts"; const LAST_ATTEMPT_KEY = "last_attempt_time";
 
-// Reset attempts after 15 mins const now = Date.now(); const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0; if (now - lastTry > 15 * 60 * 1000) { localStorage.removeItem(ATTEMPT_KEY); localStorage.removeItem(LAST_ATTEMPT_KEY); }
+// FULL SCRIPT.JS WITH ALL FEATURES ENABLED let latestVariations = []; let enablePasswords = false; let accessMode = ''; let codeUsed = false; const MAX_ATTEMPTS = 5; const ATTEMPT_KEY = "invalid_attempts"; const LAST_ATTEMPT_KEY = "last_attempt_time";
 
-// THEME TOGGLE const toggleBtn = document.getElementById("theme-toggle"); toggleBtn.onclick = () => { document.body.classList.toggle("dark"); toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙"; };
+const now = Date.now(); const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0; if (now - lastTry > 15 * 60 * 1000) { localStorage.removeItem(ATTEMPT_KEY); localStorage.removeItem(LAST_ATTEMPT_KEY); }
 
-// TABS Array.from(document.querySelectorAll(".tab")).forEach(tab => { tab.onclick = () => { document.querySelectorAll(".tab").forEach(t => t.classList.remove("active")); document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); tab.classList.add("active"); document.getElementById(tab.dataset.tab).classList.add("active"); }; });
+// Theme toggle const toggleBtn = document.getElementById("theme-toggle"); toggleBtn.onclick = () => { document.body.classList.toggle("dark"); toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙"; };
 
-function submitAccessCode() { const code = document.getElementById("access-code").value.trim(); if (!code) return alert("Enter a code");
+// Tab switching Array.from(document.querySelectorAll(".tab")).forEach(tab => { tab.onclick = () => { document.querySelectorAll(".tab").forEach(t => t.classList.remove("active")); document.querySelectorAll(".section").forEach(s => s.classList.remove("active")); tab.classList.add("active"); document.getElementById(tab.dataset.tab).classList.add("active"); }; });
 
-if (["2025", "master"].includes(code)) { document.getElementById("generator-panel").style.display = "block"; document.getElementById("password-toggle-container").style.display = "block"; document.getElementById("help").style.display = "block"; localStorage.removeItem(ATTEMPT_KEY); localStorage.removeItem(LAST_ATTEMPT_KEY); accessMode = "master"; return; }
+// Submit code with API check async function submitAccessCode() { const code = document.getElementById("access-code").value.trim(); if (!code) return alert("Please enter an access code");
 
-let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0; attempts++; localStorage.setItem(ATTEMPT_KEY, attempts); localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
+try { const res = await fetch("/api/validate-access-code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
 
-if (attempts >= MAX_ATTEMPTS) { triggerSystemWipe(); return; }
+const data = await res.json();
+console.log("Access code response:", data);
 
-alert(❌ Invalid code. Attempt ${attempts} of ${MAX_ATTEMPTS}.); }
+if (!data.valid) {
+  let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0;
+  attempts++;
+  localStorage.setItem(ATTEMPT_KEY, attempts);
+  localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
+
+  if (attempts >= MAX_ATTEMPTS) return triggerSystemWipe();
+  return alert("❌ Invalid or expired access code");
+}
+
+accessMode = data.mode;
+document.getElementById("generator-panel").style.display = "block";
+if (accessMode === "master") {
+  document.getElementById("password-toggle-container").style.display = "block";
+  document.getElementById("help").style.display = "block";
+}
+
+} catch (err) { console.error("Access check error:", err); alert("❌ Server error while checking code"); } }
 
 function triggerSystemWipe() { document.body.classList.add("locked"); document.getElementById("lockdown-modal").style.display = "flex"; }
 
@@ -36,7 +53,7 @@ document.getElementById("variation-list").innerHTML = <p>Generated ${latestVaria
 
 function generatePasswordsForEmails(emailList) { const passwords = {}; emailList.forEach(email => { passwords[email] = Math.floor(100000 + Math.random() * 900000).toString(); }); return passwords; }
 
-function copyEmails() { const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {}; const lines = latestVariations.map(email => ${email}${enablePasswords ?  | Pass: ${passwords[email]} : ""} ); navigator.clipboard.writeText(lines.join("\n")) .then(() => alert("Copied to clipboard!")); }
+function copyEmails() { const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {}; const lines = latestVariations.map(email => ${email}${enablePasswords ?  | Pass: ${passwords[email]} : ""} ); navigator.clipboard.writeText(lines.join("\n")).then(() => alert("Copied to clipboard!")); }
 
 function downloadEmails() { const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {}; const lines = latestVariations.map(email => ${email}${enablePasswords ? "," + passwords[email] : ""} ); const header = enablePasswords ? "Email,Password" : "Email"; const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "gmail_variations.csv"; a.click(); }
 
