@@ -195,7 +195,7 @@ async function askOpenAI() {
   output.innerHTML = "<em>Thinking...</em>";
 
   try {
-    const res = await fetch("/api/ai-assistant", {
+    const res = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userMsg: input })
