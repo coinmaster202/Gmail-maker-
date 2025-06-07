@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>One Two Gmail Tool</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -10,7 +10,8 @@
 <body>
   <header>
     <h1>One Two Gmail Tool</h1>
-  </header>  <main>
+  </header>
+  <main>
     <div class="tabs">
       <div class="tab active" data-tab="generator">Gmail Generator</div>
       <div class="tab" data-tab="csv">Convert to CSV</div>
@@ -18,12 +19,11 @@
       <div class="tab" data-tab="formatter">Gmail Formatter</div>
       <div class="tab" data-tab="faker">Fake Generator</div>
       <div class="tab" data-tab="help">AI Help Desk</div>
-    </div><div class="section active" id="generator">
-  <input type="password" id="access-code" placeholder="Enter access code">
-  <small>One-time codes will expire after one use.</small>
-  <button onclick="submitAccessCode()">Unlock Tool</button>
-
-  <div id="generator-panel" style="display:none;">
+    </div>
+    <div class="section active" id="generator">
+      <input type="password" id="access-code" placeholder="Enter access code">
+      <small>One-time codes will expire after one use.</small>
+      <button onclick="submitAccessCode()">Unlock Tool</button><div id="generator-panel" style="display:none;">
     <input type="text" id="gmail-user" placeholder="Gmail username (without @gmail.com)">
     <div id="password-toggle-container" style="display:none;">
       <label><input type="checkbox" id="toggle-password"> Include random passwords</label>
@@ -63,7 +63,8 @@
   <div id="ai-response"></div>
 </div>
 
-  </main>  <footer>
+  </main>
+  <footer>
     <p>&copy; 2025 One Two Gmail Tool</p>
   </footer>  <div id="spinner-overlay"><div class="spinner"></div></div>  <div id="crash-warning-modal" class="modal">
     <div class="modal-content">
