@@ -13,10 +13,16 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENAI_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",  // 🔁 Changed from gpt-4 to gpt-3.5-turbo
         messages: [
-          { role: "system", content: "You are a helpful assistant answering questions about the One Two Gmail Tool only." },
-          { role: "user", content: userMsg },
+          {
+            role: "system",
+            content: "You are a helpful assistant answering questions about the One Two Gmail Tool only."
+          },
+          {
+            role: "user",
+            content: userMsg
+          },
         ],
       }),
     });
