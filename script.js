@@ -20,13 +20,15 @@ toggleBtn.onclick = () => {
   toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 };
 
-// Tab switching
+// ✅ Updated Tab Switching (one section visible at a time)
 document.querySelectorAll(".tab").forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s => s.style.display = "none");
+
     tab.classList.add("active");
-    document.getElementById(tab.dataset.tab).classList.add("active");
+    const sectionId = tab.dataset.tab;
+    document.getElementById(sectionId).style.display = "block";
   };
 });
 
@@ -42,7 +44,6 @@ async function submitAccessCode() {
       body: JSON.stringify({ code })
     });
     const data = await res.json();
-    console.log("Access code response:", data);
 
     if (!data.valid) {
       let attempts = parseInt(localStorage.getItem(ATTEMPT_KEY)) || 0;
@@ -61,7 +62,6 @@ async function submitAccessCode() {
       document.getElementById("help").style.display = "block";
     }
   } catch (err) {
-    console.error("Access check error:", err);
     alert("❌ Server error while checking code");
   }
 }
@@ -195,13 +195,14 @@ async function askOpenAI() {
   output.innerHTML = "<em>Thinking...</em>";
 
   try {
-    const res = await fetch("/api/ask", {
+    const res = await fetch("/api/ai-assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: input })
+      body: JSON.stringify({ userMsg: input })
     });
+
     const data = await res.json();
-    output.innerHTML = data.answer || "❌ No response from AI";
+    output.innerHTML = data.reply || "❌ No response from AI";
   } catch (err) {
     output.innerHTML = "❌ Error reaching AI.";
   }
