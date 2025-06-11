@@ -6,7 +6,7 @@ const MAX_ATTEMPTS = 5;
 const ATTEMPT_KEY = "invalid_attempts";
 const LAST_ATTEMPT_KEY = "last_attempt_time";
 
-// 🕒 Reset attempts after 15 mins
+// ⏱ Reset attempts after 15 mins
 const now = Date.now();
 const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0;
 if (now - lastTry > 15 * 60 * 1000) {
@@ -21,7 +21,7 @@ toggleBtn.onclick = () => {
   toggleBtn.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 };
 
-// 📑 Tab Switching (1 visible at a time)
+// 📑 Tab Switching
 document.querySelectorAll(".tab").forEach(tab => {
   tab.onclick = () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
@@ -31,13 +31,12 @@ document.querySelectorAll(".tab").forEach(tab => {
     const sectionId = tab.dataset.tab;
     document.getElementById(sectionId).style.display = "block";
 
-    // 🔐 Hide AI response in all sections except ai-help-desk
     const aiPanel = document.getElementById("ai-response-panel");
-    if (aiPanel) aiPanel.style.display = (sectionId === "ai-help-desk") ? "block" : "none";
+    if (aiPanel) aiPanel.style.display = sectionId === "help" ? "block" : "none";
   };
 });
 
-// 🔐 Access Code Check
+// 🔐 Access Code Unlock
 async function submitAccessCode() {
   const code = document.getElementById("access-code").value.trim();
   if (!code) return alert("Please enter an access code");
@@ -55,7 +54,6 @@ async function submitAccessCode() {
       attempts++;
       localStorage.setItem(ATTEMPT_KEY, attempts);
       localStorage.setItem(LAST_ATTEMPT_KEY, Date.now());
-
       if (attempts >= MAX_ATTEMPTS) return triggerSystemWipe();
       return alert("❌ Invalid or expired access code");
     }
@@ -67,7 +65,6 @@ async function submitAccessCode() {
       document.getElementById("help").style.display = "block";
     }
 
-    // ✅ Reset invalid attempts on success
     localStorage.removeItem(ATTEMPT_KEY);
     localStorage.removeItem(LAST_ATTEMPT_KEY);
   } catch (err) {
@@ -75,7 +72,7 @@ async function submitAccessCode() {
   }
 }
 
-// 💀 Lockdown
+// 🔒 Lockdown modal
 function triggerSystemWipe() {
   document.body.classList.add("locked");
   document.getElementById("lockdown-modal").style.display = "flex";
@@ -86,14 +83,16 @@ function dismissCrashWarning() {
   document.getElementById("crash-warning-modal").style.display = "none";
 }
 
-// 📬 Generate Gmail Dot Variations
+// 🟩 Generate Gmail Variations
 function generateEmails() {
   const username = document.getElementById("gmail-user").value.trim();
   if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
 
   enablePasswords = document.getElementById("toggle-password")?.checked;
-
   const total = Math.pow(2, username.length - 1);
+
+  document.getElementById("possibility-count").textContent = `Possible: ${total.toLocaleString()} variations`;
+
   if (total > 50000) {
     document.getElementById("crash-warning-modal").style.display = "flex";
   }
@@ -113,27 +112,27 @@ function generateEmails() {
   latestVariations = Array.from(emails);
   const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {};
 
-  const listHTML = latestVariations.map(e =>
+  const listHTML = latestVariations.slice(0, 300).map(e =>
     `<li>${e}${enablePasswords ? " | Pass: " + passwords[e] : ""}</li>`
   ).join("");
 
   document.getElementById("variation-list").innerHTML = `
-    <p>Generated ${latestVariations.length} variations.</p>
+    <p>Showing first 300 of ${latestVariations.length} variations.</p>
     <ul>${listHTML}</ul>
   `;
 }
 
-// 🔢 Memorable 3-digit number passwords
+// 🔢 3-digit random passwords
 function generatePasswordsForEmails(emailList) {
   const passwords = {};
   emailList.forEach(email => {
-    const num = Math.floor(100 + Math.random() * 900); // 100–999
+    const num = Math.floor(100 + Math.random() * 900);
     passwords[email] = `${num}`;
   });
   return passwords;
 }
 
-// 📋 Copy to clipboard
+// 📋 Copy all
 function copyEmails() {
   const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {};
   const lines = latestVariations.map(email =>
@@ -142,7 +141,7 @@ function copyEmails() {
   navigator.clipboard.writeText(lines.join("\n")).then(() => alert("Copied to clipboard!"));
 }
 
-// 📥 Download CSV
+// 💾 Download CSV
 function downloadEmails() {
   const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {};
   const lines = latestVariations.map(email =>
@@ -156,7 +155,7 @@ function downloadEmails() {
   a.click();
 }
 
-// 🔄 Convert pasted to CSV
+// 🔄 CSV Converter
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(x => x.includes("@"));
@@ -183,7 +182,7 @@ function checkForDuplicates() {
   `;
 }
 
-// 📂 Format Gmail Dots
+// ✉️ Gmail Formatter
 function formatGmailVariations() {
   const input = document.getElementById("format-input").value.trim().split(/\r?\n/);
   const groups = {};
@@ -198,7 +197,7 @@ function formatGmailVariations() {
   document.getElementById("format-output").innerHTML = `<ul>${result}</ul>`;
 }
 
-// 🎭 Fake Accounts
+// 🧪 Fake Account Generator
 function generateFakeAccounts() {
   const names = ["alex", "jordan", "mika", "sam", "taylor", "kai"];
   const result = Array.from({ length: 10 }, () => {
@@ -209,7 +208,7 @@ function generateFakeAccounts() {
   document.getElementById("fake-output").innerHTML = `<ul>${result.map(r => `<li>${r}</li>`).join('')}</ul>`;
 }
 
-// 🤖 Ask OpenAI (AI Help Desk Only)
+// 🤖 Ask AI (Help tab only)
 async function askOpenAI() {
   const input = document.getElementById("user-question").value.trim();
   const output = document.getElementById("ai-response");
@@ -229,7 +228,7 @@ async function askOpenAI() {
   }
 }
 
-// 🌍 Expose global
+// 🌍 Expose to window
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
