@@ -6,7 +6,7 @@ const MAX_ATTEMPTS = 5;
 const ATTEMPT_KEY = "invalid_attempts";
 const LAST_ATTEMPT_KEY = "last_attempt_time";
 
-// ⏱ Reset attempts after 15 mins
+// 🕒 Reset attempts after 15 minutes
 const now = Date.now();
 const lastTry = parseInt(localStorage.getItem(LAST_ATTEMPT_KEY)) || 0;
 if (now - lastTry > 15 * 60 * 1000) {
@@ -83,7 +83,7 @@ function dismissCrashWarning() {
   document.getElementById("crash-warning-modal").style.display = "none";
 }
 
-// 🟩 Generate Gmail Variations
+// 📧 Gmail Dot Generator
 function generateEmails() {
   const username = document.getElementById("gmail-user").value.trim();
   if (!/^[a-zA-Z0-9]+$/.test(username)) return alert("Invalid Gmail username");
@@ -91,7 +91,8 @@ function generateEmails() {
   enablePasswords = document.getElementById("toggle-password")?.checked;
   const total = Math.pow(2, username.length - 1);
 
-  document.getElementById("possibility-count").textContent = `Possible: ${total.toLocaleString()} variations`;
+  document.getElementById("possibility-count").textContent =
+    `Possible: ${total.toLocaleString()} variations`;
 
   if (total > 50000) {
     document.getElementById("crash-warning-modal").style.display = "flex";
@@ -112,27 +113,25 @@ function generateEmails() {
   latestVariations = Array.from(emails);
   const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {};
 
-  const listHTML = latestVariations.slice(0, 300).map(e =>
-    `<li>${e}${enablePasswords ? " | Pass: " + passwords[e] : ""}</li>`
-  ).join("");
-
   document.getElementById("variation-list").innerHTML = `
     <p>Showing first 300 of ${latestVariations.length} variations.</p>
-    <ul>${listHTML}</ul>
+    <ul>${latestVariations.slice(0, 300).map(e =>
+      `<li>${e}${enablePasswords ? " | Pass: " + passwords[e] : ""}</li>`
+    ).join("")}</ul>
   `;
 }
 
-// 🔢 3-digit random passwords
+// 🔐 Passwords as 'livu' + 3-digit number
 function generatePasswordsForEmails(emailList) {
   const passwords = {};
   emailList.forEach(email => {
-    const num = Math.floor(100 + Math.random() * 900);
-    passwords[email] = `${num}`;
+    const num = Math.floor(100 + Math.random() * 900); // 3-digit
+    passwords[email] = `livu${num}`;
   });
   return passwords;
 }
 
-// 📋 Copy all
+// 📋 Copy to Clipboard
 function copyEmails() {
   const passwords = enablePasswords ? generatePasswordsForEmails(latestVariations) : {};
   const lines = latestVariations.map(email =>
@@ -155,7 +154,7 @@ function downloadEmails() {
   a.click();
 }
 
-// 🔄 CSV Converter
+// 📤 Convert Pasted Emails to CSV
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(x => x.includes("@"));
@@ -166,7 +165,7 @@ function convertToCSV() {
   a.click();
 }
 
-// 🧾 Duplicate Checker
+// 🔁 Duplicate Checker
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().split(/\r?\n/);
   const seen = new Set();
@@ -182,7 +181,7 @@ function checkForDuplicates() {
   `;
 }
 
-// ✉️ Gmail Formatter
+// 🧹 Gmail Dot Formatter
 function formatGmailVariations() {
   const input = document.getElementById("format-input").value.trim().split(/\r?\n/);
   const groups = {};
@@ -197,18 +196,18 @@ function formatGmailVariations() {
   document.getElementById("format-output").innerHTML = `<ul>${result}</ul>`;
 }
 
-// 🧪 Fake Account Generator
+// 🤖 Fake Gmail Accounts
 function generateFakeAccounts() {
   const names = ["alex", "jordan", "mika", "sam", "taylor", "kai"];
   const result = Array.from({ length: 10 }, () => {
     const name = names[Math.floor(Math.random() * names.length)];
     const num = Math.floor(100 + Math.random() * 900);
-    return `${name}${num}@gmail.com | Pass: ${Math.floor(100 + Math.random() * 900)}`;
+    return `${name}${num}@gmail.com | Pass: livu${Math.floor(100 + Math.random() * 900)}`;
   });
   document.getElementById("fake-output").innerHTML = `<ul>${result.map(r => `<li>${r}</li>`).join('')}</ul>`;
 }
 
-// 🤖 Ask AI (Help tab only)
+// 🧠 Ask AI (only in Help tab)
 async function askOpenAI() {
   const input = document.getElementById("user-question").value.trim();
   const output = document.getElementById("ai-response");
@@ -228,7 +227,7 @@ async function askOpenAI() {
   }
 }
 
-// 🌍 Expose to window
+// 🌍 Expose globally
 window.submitAccessCode = submitAccessCode;
 window.generateEmails = generateEmails;
 window.copyEmails = copyEmails;
