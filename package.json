@@ -1,9 +1,14 @@
 {
-  "name": "onetwo-gmail-tool",
+  "name": "onetwo-telegram-bot",
   "version": "1.0.0",
   "type": "module",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
   "dependencies": {
-    "resend": "^1.0.0",
-    "@upstash/redis": "^1.23.0"
+    "@upstash/redis": "^1.23.0",
+    "dotenv": "^16.3.1",
+    "node-telegram-bot-api": "^0.61.0"
   }
 }
