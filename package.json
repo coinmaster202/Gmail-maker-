@@ -4,6 +4,6 @@
   "type": "module",
   "dependencies": {
     "resend": "^1.0.0",
-    "@supabase/supabase-js": "^2.39.6"
+    "@upstash/redis": "^1.23.0"
   }
 }
