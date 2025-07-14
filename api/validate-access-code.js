@@ -1,12 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
+import { Redis } from '@upstash/redis';
 
-// Connect to Supabase
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN
+});
 
-// Permanent (non-deletable) access codes
+// Permanent codes that never expire
 const permanentCodes = {
   '2025': 'master',
   '1234': 'standard',
@@ -25,34 +24,28 @@ export default async function handler(req, res) {
 
   console.log("Access code received:", code);
 
-  if (!code) {
-    console.log("No code provided");
-    return res.status(400).json({ valid: false });
-  }
+  if (!code) return res.status(400).json({ valid: false });
 
   // Check permanent codes
   if (permanentCodes[code]) {
-    console.log("Matched permanent code:", code, "→", permanentCodes[code]);
+    console.log("Matched permanent code:", code);
     return res.status(200).json({ valid: true, mode: permanentCodes[code] });
   }
 
-  // Check Supabase for one-time code
-  const { data, error } = await supabase
-    .from('one_time_codes')
-    .select('mode')
-    .eq('code', code)
-    .single();
+  try {
+    const mode = await redis.get(`code:${code}`);
+    if (!mode) {
+      console.log("Code not found or already used.");
+      return res.status(200).json({ valid: false });
+    }
 
-  console.log("Supabase response:", { data, error });
+    // Delete after first use
+    await redis.del(`code:${code}`);
+    console.log("Used and deleted one-time code:", code);
 
-  if (!data || error) {
-    console.log("Code not found or error occurred.");
-    return res.status(200).json({ valid: false });
+    return res.status(200).json({ valid: true, mode });
+  } catch (err) {
+    console.error("Redis error:", err);
+    return res.status(500).json({ error: 'Redis error' });
   }
-
-  // Delete code after first use
-  await supabase.from('one_time_codes').delete().eq('code', code);
-  console.log("One-time code used and deleted:", code);
-
-  return res.status(200).json({ valid: true, mode: data.mode });
 }
