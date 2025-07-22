@@ -95,5 +95,21 @@
   </div>
 
   <button id="theme-toggle" title="Toggle Theme">🌙</button>
+<script>
+  console.log("✅ Inline script loaded.");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("✅ DOM is ready.");
+
+    document.querySelector(".tab").addEventListener("click", () => {
+      alert("✅ Tab click is working!");
+    });
+
+    window.submitAccessCode = function () {
+      alert("✅ Submit access code triggered!");
+      document.getElementById("generator-panel").style.display = "block";
+    };
+  });
+</script>
 </body>
 </html>
