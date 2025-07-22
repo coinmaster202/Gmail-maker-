@@ -34,7 +34,7 @@ document.querySelectorAll(".tab").forEach(tab => {
     const aiPanel = document.getElementById("ai-response-panel");
     if (aiPanel) aiPanel.style.display = sectionId === "help" ? "block" : "none";
   };
-});
+};
 
 // 🔐 Access Code Unlock
 async function submitAccessCode() {
@@ -125,7 +125,7 @@ function generateEmails() {
 function generatePasswordsForEmails(emailList) {
   const passwords = {};
   emailList.forEach(email => {
-    const num = Math.floor(100 + Math.random() * 900); // 3-digit
+    const num = Math.floor(100 + Math.random() * 900);
     passwords[email] = `livu${num}`;
   });
   return passwords;
@@ -154,30 +154,73 @@ function downloadEmails() {
   a.click();
 }
 
-// 📤 Convert Pasted Emails to CSV
+// 📤 Convert Pasted Emails to CSV with Duplicate Removal
 function convertToCSV() {
   const input = document.getElementById("csv-input").value.trim();
   const lines = input.split(/\r?\n/).filter(x => x.includes("@"));
-  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+
+  const seen = new Set();
+  const cleaned = [];
+
+  lines.forEach(line => {
+    const email = line.trim().toLowerCase();
+    const [user, domain] = email.split("@");
+
+    if (!user || !domain) return;
+
+    const normalizedUser = domain === "gmail.com" ? user.replace(/\./g, "") : user;
+    const normalizedEmail = `${normalizedUser}@${domain}`;
+
+    if (!seen.has(normalizedEmail)) {
+      seen.add(normalizedEmail);
+      cleaned.push(email); // Keep original format
+    }
+  });
+
+  const blob = new Blob([cleaned.join("\n")], { type: "text/csv" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "converted.csv";
+  a.download = "converted_deduplicated.csv";
   a.click();
+
+  alert(`✅ Converted ${lines.length} emails → ${cleaned.length} unique (duplicates removed)`);
 }
 
-// 🔁 Duplicate Checker
+// 🔁 Duplicate Checker with Dot Trick
 function checkForDuplicates() {
   const input = document.getElementById("dup-input").value.trim().split(/\r?\n/);
   const seen = new Set();
   const dups = [];
-  input.forEach(x => {
-    const clean = x.trim().toLowerCase();
-    if (seen.has(clean)) dups.push(clean);
-    else seen.add(clean);
+  const originalMap = {};
+
+  input.forEach(raw => {
+    const email = raw.trim().toLowerCase();
+    const [user, domain] = email.split("@");
+
+    if (!domain || !user) return;
+
+    const normalizedUser = domain === "gmail.com" ? user.replace(/\./g, "") : user;
+    const normalizedEmail = `${normalizedUser}@${domain}`;
+
+    if (seen.has(normalizedEmail)) {
+      dups.push(email);
+      originalMap[normalizedEmail] = originalMap[normalizedEmail] || [];
+      originalMap[normalizedEmail].push(email);
+    } else {
+      seen.add(normalizedEmail);
+      originalMap[normalizedEmail] = [email];
+    }
   });
+
+  const grouped = Object.entries(originalMap)
+    .filter(([_, group]) => group.length > 1)
+    .map(([norm, group]) =>
+      `<li><strong>${norm}</strong>: ${group.join(', ')}</li>`
+    ).join('');
+
   document.getElementById("dup-result").innerHTML = `
-    <p>Found ${dups.length} duplicates.</p>
-    <ul>${dups.map(d => `<li>${d}</li>`).join('')}</ul>
+    <p>Found ${dups.length} duplicates (via Gmail variation rules).</p>
+    <ul>${grouped}</ul>
   `;
 }
 
